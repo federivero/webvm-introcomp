@@ -1,8 +1,5 @@
 <script>
 	import { onMount, tick } from 'svelte';
-	import { get } from 'svelte/store';
-	import Nav from 'labs/packages/global-navbar/src/Nav.svelte';
-	import SideBar from '$lib/SideBar.svelte';
 	import '$lib/global.css';
 	import '@xterm/xterm/css/xterm.css'
 	import '@fortawesome/fontawesome-free/css/all.min.css'
@@ -361,11 +358,15 @@
 </script>
 
 <main class="relative w-full h-full">
-	<Nav />
+	<nav aria-label="Primary" class="navbar">
+		<ul class="items">
+			<span class="nav-company-name-wrapper">
+				<span class="nav-company-name">Introducción a la Computación - Taller 2: Consola</span>
+			</span>
+		</ul>
+	</nav>
+
 	<div class="absolute top-10 bottom-0 left-0 right-0">
-		<SideBar on:connect={handleConnect} on:reset={handleReset} handleTool={!configObj.needsDisplay || curVT == 7 ? handleTool : null} on:sidebarPinChange={handleSidebarPinChange}>
-			<slot></slot>
-		</SideBar>
 		{#if configObj.needsDisplay}
 			<div class="absolute top-0 bottom-0 {sideBarPinned ? 'left-[23.5rem]' : 'left-14'} right-0">
 				<canvas class="w-full h-full cursor-none" id="display"></canvas>
@@ -375,3 +376,65 @@
 		</div>
 	</div>
 </main>
+
+<style>
+	.navbar {
+		background: black;
+		height: 2.5rem;
+		border-bottom: 1px solid rgb(68 64 60);
+
+		display: flex;
+		justify-content: space-between;
+	}
+
+	.items {
+		display: flex;
+		height: 100%;
+		align-items: center;
+
+		padding: 0 1rem;
+		margin: 0;
+		list-style: none;
+
+		gap: 1rem;
+
+		position: relative; /* for .select */
+	}
+
+	@media (max-width: 768px) {
+		.desktop-only {
+			display: none !important;
+		}
+	}
+
+	@media (min-width: 769px) {
+		.mobile-only {
+			display: none !important;
+		}
+	}
+
+	span.nav-company-name-wrapper {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+		height: 100%;
+
+		color: rgb(168 162 158);
+		background: none;
+		border: 0;
+		font: inherit;
+		text-decoration: none;
+		font-weight: 600;
+	}
+	.nav-company-name {
+		color: white;
+		white-space: nowrap;
+	}
+
+	@media (max-width: 768px) {
+		.nav-company-name {
+			display: none;
+		}
+	}
+
+</style>
