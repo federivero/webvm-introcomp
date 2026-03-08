@@ -6,14 +6,14 @@ stages:
 variables:
   DOCKERFILE_PATH: "dockerfiles/debian_mini"
   IMAGE_SIZE: "750M"
-  DEPLOY_TO_GITHUB_PAGES: "true"
+  DEPLOY_TO_GITLAB_PAGES: "true"
   GITHUB_RELEASE: "false"
   TAG: "ext2-webvm-base-image"
   DEPLOY_DIR: "/webvm_deploy"
 
 workflow:
   rules:
-    - when: manual
+    - if: '$CI_PIPELINE_SOURCE == "web"'
 
 default:
   image: docker:24
@@ -121,7 +121,7 @@ build:
       - /webvm_deploy
     expire_in: 1 week
 
-deploy_pages:
+pages:
   stage: deploy
   script:
     - echo "Deploying GitLab Pages"
@@ -130,4 +130,4 @@ deploy_pages:
     paths:
       - public
   rules:
-    - if: '$DEPLOY_TO_GITHUB_PAGES == "true"'
+    - if: '$DEPLOY_TO_GITLAB_PAGES == "true"'
