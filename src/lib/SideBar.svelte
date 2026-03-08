@@ -2,25 +2,13 @@
 	import { createEventDispatcher } from 'svelte';
 	import Icon from './Icon.svelte';
 	import InformationTab from './InformationTab.svelte';
-	import NetworkingTab from './NetworkingTab.svelte';
 	import CpuTab from './CpuTab.svelte';
 	import DiskTab from './DiskTab.svelte';
-	import AnthropicTab from './AnthropicTab.svelte';
-	import PostsTab from './PostsTab.svelte';
-	import DiscordTab from './DiscordTab.svelte';
-	import GitHubTab from './GitHubTab.svelte';
 	import SmallButton from './SmallButton.svelte';
-	import { cpuActivity, diskActivity, aiActivity } from './activities.js';
+	import { cpuActivity, diskActivity } from './activities.js';
 	const icons = [
-		{ icon: 'fas fa-info-circle', info: 'Information', activity: null },
-		{ icon: 'fas fa-wifi', info: 'Networking', activity: null },
 		{ icon: 'fas fa-microchip', info: 'CPU', activity: cpuActivity },
 		{ icon: 'fas fa-compact-disc', info: 'Disk', activity: diskActivity },
-		{ icon: 'fas fa-robot', info: 'ClaudeAI', activity: aiActivity },
-		null,
-		{ icon: 'fas fa-book-open', info: 'Posts', activity: null },
-		{ icon: 'fab fa-discord', info: 'Discord', activity: null },
-		{ icon: 'fab fa-github', info: 'GitHub', activity: null },
 	];
 	let dispatch = createEventDispatcher();
 	let activeInfo = null; // Tracks currently visible info.
@@ -101,34 +89,19 @@
 			<InformationTab>
 				<slot></slot>
 			</InformationTab>
-		{:else if activeInfo === 'Networking'}
-			<NetworkingTab on:connect/>
 		{:else if activeInfo === 'CPU'}
 			<CpuTab/>
 		{:else if activeInfo === 'Disk'}
 			<DiskTab on:reset/>
-		{:else if activeInfo === 'ClaudeAI'}
-			<AnthropicTab handleTool={handleTool} />
-		{:else if activeInfo === 'Posts'}
-			<PostsTab/>
-		{:else if activeInfo === 'Discord'}
-			<DiscordTab/>
-		{:else if activeInfo === 'GitHub'}
-			<GitHubTab/>
 		{:else}
 			<p>TODO: {activeInfo}</p>
 		{/if}
 
 		<div class="mt-auto text-sm text-gray-300">
 			<div class="pt-1 pb-1">
-				<a href="https://cheerpx.io/" target="_blank">
-					<span>Powered by CheerpX</span>
-					<img src="assets/cheerpx.svg" alt="CheerpX Logo" class="w-6 h-6 inline-block">
-				</a>
 			</div>
 			<hr class="border-t border-solid border-gray-300">
 			<div class="pt-1 pb-1">
-				<a href="https://leaningtech.com/" target="”_blank”">© 2022-2025 Leaning Technologies</a>
 			</div>
 		</div>
 	</div>

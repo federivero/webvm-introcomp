@@ -8,6 +8,7 @@
 	import { introMessage, errorMessage, unexpectedErrorMessage } from '$lib/messages.js'
 	import { displayConfig, handleToolImpl } from '$lib/anthropic.js'
 	import { tryPlausible } from '$lib/plausible.js'
+  import SideBar from './SideBar.svelte';
 
 	export let configObj = null;
 	export let processCallback = null;
@@ -367,6 +368,9 @@
 	</nav>
 
 	<div class="absolute top-10 bottom-0 left-0 right-0">
+		<SideBar on:connect={handleConnect} on:reset={handleReset} handleTool={!configObj.needsDisplay || curVT == 7 ? handleTool : null} on:sidebarPinChange={handleSidebarPinChange}>
+			<slot></slot>
+		</SideBar>
 		{#if configObj.needsDisplay}
 			<div class="absolute top-0 bottom-0 {sideBarPinned ? 'left-[23.5rem]' : 'left-14'} right-0">
 				<canvas class="w-full h-full cursor-none" id="display"></canvas>
