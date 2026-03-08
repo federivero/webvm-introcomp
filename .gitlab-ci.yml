@@ -1,0 +1,133 @@
+stages:
+  - guard
+  - build
+  - deploy
+
+variables:
+  DOCKERFILE_PATH: "dockerfiles/debian_mini"
+  IMAGE_SIZE: "750M"
+  DEPLOY_TO_GITHUB_PAGES: "true"
+  GITHUB_RELEASE: "false"
+  TAG: "ext2-webvm-base-image"
+  DEPLOY_DIR: "/webvm_deploy"
+
+workflow:
+  rules:
+    - when: manual
+
+default:
+  image: docker:24
+  services:
+    - docker:24-dind
+
+before_script:
+  - apk add --no-cache bash jq coreutils util-linux e2fsprogs
+
+guard_clause:
+  stage: guard
+  script:
+    - echo "Checking Dockerfile path..."
+    - |
+      if [ ! -f "$DOCKERFILE_PATH" ]; then
+        echo "ERROR: Dockerfile not found at $DOCKERFILE_PATH"
+        exit 1
+      fi
+  rules:
+    - when: always
+
+build:
+  stage: build
+  script:
+
+    - echo "Generating image name"
+    - export IMAGE_NAME="$(basename $DOCKERFILE_PATH)_$(date +%Y%m%d)_${CI_PIPELINE_ID}.ext2"
+    - echo "IMAGE_NAME=$IMAGE_NAME"
+
+    - mkdir -p $DEPLOY_DIR
+
+    - echo "Building docker image"
+    - docker build . --tag $TAG --file $DOCKERFILE_PATH --platform=i386
+
+    - echo "Running container"
+    - docker run --dns 8.8.8.8 --dns 8.8.4.4 -d $TAG
+    - export CONTAINER_ID=$(docker ps -aq)
+
+    - echo "Extract CMD / ENTRYPOINT"
+    - |
+      cmd=$(docker inspect --format='{{json .Config.Cmd}}' $CONTAINER_ID)
+      entrypoint=$(docker inspect --format='{{json .Config.Entrypoint}}' $CONTAINER_ID)
+
+      if [[ $entrypoint != "null" && $cmd != "null" ]]; then
+        CMD=$(docker inspect $CONTAINER_ID | jq -c '.[0].Config.Entrypoint')
+        ARGS=$(docker inspect $CONTAINER_ID | jq -c '.[0].Config.Cmd')
+      elif [[ $cmd != "null" ]]; then
+        CMD=$(docker inspect $CONTAINER_ID | jq -c '.[0].Config.Cmd[:1]')
+        ARGS=$(docker inspect $CONTAINER_ID | jq -c '.[0].Config.Cmd[1:]')
+      else
+        CMD=$(docker inspect $CONTAINER_ID | jq -c '.[0].Config.Entrypoint[:1]')
+        ARGS=$(docker inspect $CONTAINER_ID | jq -c '.[0].Config.Entrypoint[1:]')
+      fi
+
+      ENV=$(docker inspect $CONTAINER_ID | jq -c '.[0].Config.Env')
+      CWD=$(docker inspect $CONTAINER_ID | jq -c '.[0].Config.WorkingDir')
+
+      echo "CMD=$CMD"
+      echo "ARGS=$ARGS"
+      echo "ENV=$ENV"
+      echo "CWD=$CWD"
+
+    - echo "Creating ext2 image"
+    - fallocate -l $IMAGE_SIZE ${IMAGE_NAME}
+    - mkfs.ext2 -r 0 ${IMAGE_NAME}
+    - mkdir -p /mnt/ext2
+    - mount -o loop -t ext2 ${IMAGE_NAME} /mnt/ext2
+
+    - echo "Copying container filesystem"
+    - docker cp -a ${CONTAINER_ID}:/ /mnt/ext2
+    - umount /mnt/ext2
+
+    - echo "Splitting image"
+    - split ${IMAGE_NAME} ${DEPLOY_DIR}/${IMAGE_NAME}.c -a 6 -b 128k -x --additional-suffix=.txt
+    - stat -c%s ${IMAGE_NAME} > ${DEPLOY_DIR}/${IMAGE_NAME}.meta
+
+    - echo "Adjust config file"
+    - |
+      sed -i "s#IMAGE_URL#\"${IMAGE_NAME}\"#g" config_github_terminal.js
+      sed -i "s#CMD#${CMD}#g" config_github_terminal.js
+      sed -i "s#ARGS#${ARGS}#g" config_github_terminal.js
+      sed -i "s#ENV#${ENV}#g" config_github_terminal.js
+      sed -i "s#CWD#${CWD}#g" config_github_terminal.js
+
+    - echo "Building npm package"
+    - npm install
+    - WEBVM_MODE=github npm run build
+
+    - echo "Copy build files"
+    - rm build/alpine.html || true
+    - mv build/* $DEPLOY_DIR/
+
+    - echo "Generating index.list files"
+    - |
+      find $DEPLOY_DIR -type d | while read -r dir; do
+        index_list="$dir/index.list"
+        rm -f "$index_list"
+        ls "$dir" > "$index_list"
+        chmod +rw "$index_list"
+        echo "created $index_list"
+      done
+
+  artifacts:
+    paths:
+      - /webvm_deploy
+    expire_in: 1 week
+
+deploy_pages:
+  stage: deploy
+  script:
+    - echo "Deploying GitLab Pages"
+    - mv /webvm_deploy public
+  artifacts:
+    paths:
+      - public
+  rules:
+    - if: '$DEPLOY_TO_GITHUB_PAGES == "true"'
