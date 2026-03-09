@@ -10,6 +10,8 @@ variables:
   GITHUB_RELEASE: "false"
   TAG: "ext2-webvm-base-image"
   DEPLOY_DIR: "/webvm_deploy"
+  DOCKER_HOST: "tcp://docker:2375"
+  DOCKER_TLS_CERTDIR: ""
 
 workflow:
   rules:
