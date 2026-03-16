@@ -1,0 +1,3 @@
+En esta sala se deberá encontrar un archivo especial a través de los directorios disponibles.
+
+Una vez obtenido, guardar el contenido y pasar a la sala 2 (cd ../sala2)

@@ -1,0 +1,29 @@
+El comando chmod permite modificar los permisos de un archivo o directorio. La forma de uso es:
+
+chmod <permisos> <archivo o directorio>
+
+Las combinaciones de permisos se indican con números:
+
+1 -> permiso de lectura
+2 -> permiso de escritura
+3 -> permiso de lectura y escritura
+4 -> permiso de ejecución
+5 -> permiso de ejecución y lectura
+6 -> permiso de ejecución y escritura
+7 -> permiso de lectura, escritura y ejecución
+
+Luego, el comando chmod recibe los permisos como 3 números consecutivos, donde el primer número refiere a los permisos del propietario, el siguiente número refiere a los permisos del grupo y el último número refiere a los permisos de todos los demás usuarios. Entonces:
+
+chmod 400 <archivo>
+
+establece permiso de lectura solo para el propietario (el resto sin permisos).
+
+chmod 777 <archivo>
+
+establece todos los permisos (lectura, escritura y ejecución) para todos los usuarios.
+
+También se pueden quitar permisos usando notación simbólica:
+
+chmod g-rw,o-x <archivo>
+
+quita permisos de lectura y escritura (rw) a los usuarios del grupo (g) y permiso de ejecución (x) al resto de los usuarios (o).
