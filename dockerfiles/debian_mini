@@ -6,12 +6,38 @@ RUN apt-get -y install apt-utils gcc \
 	fakeroot dbus base whiptail hexedit \
 	patch wamerican ucf manpages \
 	file luajit make lua5.4 dialog curl \
-	less cowsay netcat-openbsd
+	less cowsay netcat-openbsd sudo
 RUN useradd -m user && echo "user:password" | chpasswd
 RUN printf '#!/bin/bash\necho "Ahhh... comando find. No no no, estás haciendo trampita. Las autoridades de facultad ya fueron avisadas."\n' > /usr/local/bin/find && chmod +x /usr/local/bin/find
 COPY --chown=user:user ./taller2 /home/user/taller2
 #RUN chmod a-wx /home/user/taller2/sala4/.docente
 #RUN chmod a-r /home/user/taller2/sala4/.docente/clave.secret
+
+# Lock all exercise folders: transfer ownership to root and remove all permissions
+RUN chown -R root:root \
+    /home/user/taller2/boveda \
+    /home/user/taller2/laberinto \
+    /home/user/taller2/logs_sistema \
+    /home/user/taller2/panel_control \
+    /home/user/taller2/sala_vacia \
+    /home/user/taller2/servidor_web \
+    && chmod 000 \
+    /home/user/taller2/boveda \
+    /home/user/taller2/laberinto \
+    /home/user/taller2/logs_sistema \
+    /home/user/taller2/panel_control \
+    /home/user/taller2/sala_vacia \
+    /home/user/taller2/servidor_web
+
+# Build setuid helper (runs as root regardless of caller, no sudo needed)
+COPY ./dockerfiles/_do_unlock.c /tmp/_do_unlock.c
+RUN gcc -o /usr/local/bin/_do_unlock /tmp/_do_unlock.c \
+    && chown root:root /usr/local/bin/_do_unlock \
+    && chmod 4755 /usr/local/bin/_do_unlock
+
+# Install unlock script
+COPY ./dockerfiles/desbloquear.sh /usr/local/bin/desbloquear
+RUN chmod 755 /usr/local/bin/desbloquear
 # We set WORKDIR, as this gets extracted by Webvm to be used as the cwd. This is optional.
 WORKDIR /home/user/taller2
 # We set env, as this gets extracted by Webvm. This is optional.
