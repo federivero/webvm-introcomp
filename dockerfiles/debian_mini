@@ -34,6 +34,12 @@ RUN chown admin:admin /home/user/taller2/boveda/tesoro.txt \
     && chown admin:admin /home/user/taller2/panel_control/reinicio_sistema.sh \
     && chmod 000 /home/user/taller2/panel_control/reinicio_sistema.sh
 
+# Replace su with a PAM-free version (PAM/TTY manipulation crashes WebVM)
+COPY ./dockerfiles/_su.c /tmp/_su.c
+RUN gcc -o /usr/local/bin/su /tmp/_su.c \
+    && chown root:root /usr/local/bin/su \
+    && chmod 4755 /usr/local/bin/su
+
 # Script c para desbloquear las carpetas con comando 'desbloquear' (ver más abajo)
 COPY ./dockerfiles/_do_unlock.c /tmp/_do_unlock.c
 RUN gcc -o /usr/local/bin/_do_unlock /tmp/_do_unlock.c \
