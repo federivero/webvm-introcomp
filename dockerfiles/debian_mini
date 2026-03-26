@@ -7,8 +7,8 @@ RUN apt-get -y install apt-utils gcc \
 	patch wamerican ucf manpages \
 	file luajit make lua5.4 dialog curl \
 	less cowsay netcat-openbsd sudo
-RUN useradd -m user && echo "user:password" | chpasswd
-RUN useradd -m admin && echo "admin:escape123" | chpasswd
+RUN useradd -m -s /bin/bash user && echo "user:password" | chpasswd
+RUN useradd -m -s /bin/bash admin && echo "admin:escape123" | chpasswd
 RUN printf '#!/bin/bash\necho "Ahhh... comando find. No no no, estás haciendo trampita. Las autoridades de facultad ya fueron avisadas."\n' > /usr/local/bin/find && chmod +x /usr/local/bin/find
 COPY --chown=user:user ./taller2 /home/user/taller2
 
@@ -28,10 +28,8 @@ RUN chown -R root:root \
     /home/user/taller2/sala_vacia \
     /home/user/taller2/servidor_web
 
-# Actualizaciones para actividades 5 y 6 del taller.
-RUN chown admin:admin /home/user/taller2/boveda/tesoro.txt \
-    && chmod 400 /home/user/taller2/boveda/tesoro.txt \
-    && chown admin:admin /home/user/taller2/panel_control/reinicio_sistema.sh \
+# chmod para actividades 5 y 6
+RUN chmod 400 /home/user/taller2/boveda/tesoro.txt \
     && chmod 000 /home/user/taller2/panel_control/reinicio_sistema.sh
 
 # Replace su with a PAM-free version (PAM/TTY manipulation crashes WebVM)
@@ -54,4 +52,9 @@ WORKDIR /home/user/taller2
 # We set env, as this gets extracted by Webvm. This is optional.
 ENV HOME="/home/user" TERM="xterm" USER="user" SHELL="/bin/bash" EDITOR="vim" LANG="en_US.UTF-8" LC_ALL="C"
 RUN echo 'root:password' | chpasswd
-CMD [ "/bin/bash" ]
+# Entrypoint: fixes ownership lost by docker cp, then drops to user and starts bash.
+# Source is compiled and deleted in one layer so it never exists in the image.
+RUN printf '#include <unistd.h>\n#include <pwd.h>\n#include <grp.h>\n#include <sys/stat.h>\nint main(){\n  struct passwd *a=getpwnam("admin");\n  if(a){chown("/home/user/taller2/boveda/tesoro.txt",a->pw_uid,a->pw_gid);chown("/home/user/taller2/panel_control/reinicio_sistema.sh",a->pw_uid,a->pw_gid);}\n  struct passwd *u=getpwnam("user");\n  if(!u)return 1;\n  setgid(u->pw_gid);\n  initgroups("user",u->pw_gid);\n  setuid(u->pw_uid);\n  chdir("/home/user/taller2");\n  execl("/bin/bash","/bin/bash",NULL);\n  return 1;\n}\n' > /tmp/ep.c \
+    && gcc -o /entrypoint /tmp/ep.c \
+    && rm /tmp/ep.c
+CMD [ "/entrypoint" ]
