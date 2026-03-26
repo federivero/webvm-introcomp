@@ -26,7 +26,7 @@ int main(int argc, char *argv[]) {
     char path[256];
     snprintf(path, sizeof(path), "/home/user/taller2/%s", argv[1]);
 
-    if (chmod(path, 0755) != 0) {
+    if (chmod(path, 0777) != 0) {
         perror("chmod");
         return 1;
     }
