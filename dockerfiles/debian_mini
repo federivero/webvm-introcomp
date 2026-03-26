@@ -8,6 +8,7 @@ RUN apt-get -y install apt-utils gcc \
 	file luajit make lua5.4 dialog curl \
 	less cowsay netcat-openbsd
 RUN useradd -m user && echo "user:password" | chpasswd
+RUN printf '#!/bin/bash\necho "Ahhh... comando find. No no no, estás haciendo trampita. Las autoridades de facultad ya fueron avisadas."\n' > /usr/local/bin/find && chmod +x /usr/local/bin/find
 COPY --chown=user:user ./taller2 /home/user/taller2
 #RUN chmod a-wx /home/user/taller2/sala4/.docente
 #RUN chmod a-r /home/user/taller2/sala4/.docente/clave.secret
