@@ -8,12 +8,11 @@ RUN apt-get -y install apt-utils gcc \
 	file luajit make lua5.4 dialog curl \
 	less cowsay netcat-openbsd sudo
 RUN useradd -m user && echo "user:password" | chpasswd
+RUN useradd -m admin && echo "admin:escape123" | chpasswd
 RUN printf '#!/bin/bash\necho "Ahhh... comando find. No no no, estás haciendo trampita. Las autoridades de facultad ya fueron avisadas."\n' > /usr/local/bin/find && chmod +x /usr/local/bin/find
 COPY --chown=user:user ./taller2 /home/user/taller2
-#RUN chmod a-wx /home/user/taller2/sala4/.docente
-#RUN chmod a-r /home/user/taller2/sala4/.docente/clave.secret
 
-# Lock all exercise folders: transfer ownership to root and remove all permissions
+# Cambian todos las carpetas a root para bloquearlas
 RUN chown -R root:root \
     /home/user/taller2/boveda \
     /home/user/taller2/laberinto \
@@ -29,13 +28,19 @@ RUN chown -R root:root \
     /home/user/taller2/sala_vacia \
     /home/user/taller2/servidor_web
 
-# Build setuid helper (runs as root regardless of caller, no sudo needed)
+# Actualizaciones para actividades 5 y 6 del taller.
+RUN chown admin:admin /home/user/taller2/boveda/tesoro.txt \
+    && chmod 400 /home/user/taller2/boveda/tesoro.txt \
+    && chown admin:admin /home/user/taller2/panel_control/reinicio_sistema.sh \
+    && chmod 000 /home/user/taller2/panel_control/reinicio_sistema.sh
+
+# Script c para desbloquear las carpetas con comando 'desbloquear' (ver más abajo)
 COPY ./dockerfiles/_do_unlock.c /tmp/_do_unlock.c
 RUN gcc -o /usr/local/bin/_do_unlock /tmp/_do_unlock.c \
     && chown root:root /usr/local/bin/_do_unlock \
     && chmod 4755 /usr/local/bin/_do_unlock
 
-# Install unlock script
+# Script de desbloqueo de carpetas (comando 'desbloquear')
 COPY ./dockerfiles/desbloquear.sh /usr/local/bin/desbloquear
 RUN chmod 755 /usr/local/bin/desbloquear
 # We set WORKDIR, as this gets extracted by Webvm to be used as the cwd. This is optional.
