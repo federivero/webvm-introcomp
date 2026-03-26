@@ -9,8 +9,8 @@ RUN apt-get -y install apt-utils gcc \
 	less cowsay netcat-openbsd
 RUN useradd -m user && echo "user:password" | chpasswd
 COPY --chown=user:user ./taller2 /home/user/taller2
-RUN chmod a-wx /home/user/taller2/sala4/.docente
-RUN chmod a-r /home/user/taller2/sala4/.docente/clave.secret
+#RUN chmod a-wx /home/user/taller2/sala4/.docente
+#RUN chmod a-r /home/user/taller2/sala4/.docente/clave.secret
 # We set WORKDIR, as this gets extracted by Webvm to be used as the cwd. This is optional.
 WORKDIR /home/user/taller2
 # We set env, as this gets extracted by Webvm. This is optional.
