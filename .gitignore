@@ -2,5 +2,3 @@
 /.svelte-kit
 pnpm-lock.yaml
 build/
-escape_room_ambiente*/
-escape_room_ambiente.zip
