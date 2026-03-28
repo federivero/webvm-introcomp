@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <glob.h>
 
 int main(int argc, char *argv[]) {
     if (argc != 2) {
@@ -23,13 +24,23 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    char path[256];
-    snprintf(path, sizeof(path), "/home/user/taller2/%s", argv[1]);
+    char pattern[256];
+    snprintf(pattern, sizeof(pattern), "/home/user/taller2/*/%s", argv[1]);
 
-    if (chmod(path, 0777) != 0) {
-        perror("chmod");
+    glob_t globbuf;
+    int error = 0;
+    if (glob(pattern, 0, NULL, &globbuf) == 0) {
+        for (size_t i = 0; i < globbuf.gl_pathc; i++) {
+            if (chmod(globbuf.gl_pathv[i], 0777) != 0) {
+                perror("chmod");
+                error = 1;
+            }
+        }
+        globfree(&globbuf);
+    } else {
+        fprintf(stderr, "No se encontró la sala.\n");
         return 1;
     }
 
-    return 0;
+    return error;
 }
