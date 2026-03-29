@@ -54,10 +54,10 @@ RUN gcc -o /usr/local/bin/_do_unlock /tmp/_do_unlock.c \
 # Script de desbloqueo de carpetas (comando 'desbloquear')
 COPY ./dockerfiles/desbloquear.sh /usr/local/bin/desbloquear
 RUN chmod 755 /usr/local/bin/desbloquear
-# We set WORKDIR, as this gets extracted by Webvm to be used as the cwd. This is optional.
-WORKDIR /home/user/taller2
-# We set env, as this gets extracted by Webvm. This is optional.
-ENV HOME="/home/user" TERM="xterm" USER="user" SHELL="/bin/bash" EDITOR="vim" LANG="en_US.UTF-8" LC_ALL="C"
+# # We set WORKDIR, as this gets extracted by Webvm to be used as the cwd. This is optional.
+# WORKDIR /home/user/taller2
+# # We set env, as this gets extracted by Webvm. This is optional.
+# ENV HOME="/home/user" TERM="xterm" USER="user" SHELL="/bin/bash" EDITOR="vim" LANG="en_US.UTF-8" LC_ALL="C"
 RUN echo 'root:password' | chpasswd
 # Entrypoint: fixes ownership lost by docker cp, then drops to user and starts bash.
 # Source is compiled and deleted in one layer so it never exists in the image.
@@ -112,6 +112,11 @@ RUN gcc -o /entrypoint /tmp/ep.c \
     && chown root:root /entrypoint \
     && chmod 4755 /entrypoint \
     && rm /tmp/ep.c
+
+# We set WORKDIR, as this gets extracted by Webvm to be used as the cwd. This is optional.
+WORKDIR /home/user/taller2
+# We set env, as this gets extracted by Webvm. This is optional.
+ENV HOME="/home/user" TERM="xterm" USER="user" SHELL="/bin/bash" EDITOR="vim" LANG="en_US.UTF-8" LC_ALL="C"
 
 # 3. Start the binary (fixed the typo from /entryypoint to /entrypoint)
 CMD [ "/entrypoint" ]
