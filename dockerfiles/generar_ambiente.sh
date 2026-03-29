@@ -1,22 +1,57 @@
 #!/bin/bash
 
+BATCH_SIZE=25
+DESAFIOS_SELECCIONADOS="all"
+
+# Procesar argumentos de la línea de comandos
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        -b|--batch-size)
+            BATCH_SIZE="$2"
+            shift 2
+            ;;
+        -d|--desafios)
+            DESAFIOS_SELECCIONADOS="$2"
+            shift 2
+            ;;
+        *)
+            # Los argumentos posicionales restantes se asumen como desafíos
+            DESAFIOS_SELECCIONADOS="$*"
+            break
+            ;;
+    esac
+done
+
 generar_ambiente() {
 # Nombre del directorio principal donde se desarrollará el Escape Room
 local BASE_DIR="$1"
 
-# Generar prefijo y sufijo aleatorios únicos (en formato hexadecimal de 4 caracteres)
-local PREFIX=$(printf "%04X" $RANDOM)
-local SUFFIX=$(printf "%04X" $RANDOM)
+# Semilla aleatoria única por subproceso para evitar colisiones al paralelizar
+RANDOM=$BASHPID
 
 echo "Creando ambiente para el Escape Room en ./$BASE_DIR..."
 
-# Limpiar el ambiente si ya existe previamente y crearlo de nuevo
-rm -rf "$BASE_DIR"
+# Crear el ambiente base si no existe
 mkdir -p "$BASE_DIR"
 cd "$BASE_DIR" || return 1
 
-# --- Desafío 1: El Laberinto (Navegación) ---
+# Mantener consistencia en el prefijo y sufijo si ya se habían generado para este grupo (útil si se regenera solo un desafío)
+local PREFIX SUFFIX
+if [ -f ".ambiente_metadata" ]; then
+    source .ambiente_metadata
+else
+    PREFIX=$(printf "%04X" $RANDOM)
+    SUFFIX=$(printf "%04X" $RANDOM)
+    echo "PREFIX=$PREFIX" > .ambiente_metadata
+    echo "SUFFIX=$SUFFIX" >> .ambiente_metadata
+fi
+
+
+## --- Desafío 1: El Laberinto (Navegación) --- ##
+if [[ "$DESAFIOS_SELECCIONADOS" == *"all"* ]] || [[ " $DESAFIOS_SELECCIONADOS " =~ " 1 " ]]; then
+
 echo "Configurando Desafío 1..."
+rm -rf laberinto
 mkdir -p laberinto
 
 # Definir diccionarios para la estructura
@@ -48,24 +83,44 @@ CAMINO_REAL="laberinto/$N1/$N2/$N3/$N4"
 mkdir -p "$CAMINO_REAL"
 echo "¡Me encontraste! Has demostrado que sabes navegar." > "$CAMINO_REAL/nota_de_rescate.txt"
 echo "Bandera 1: FLAG{${PREFIX}_NAV_3XP3RT_${SUFFIX}}" >> "$CAMINO_REAL/nota_de_rescate.txt"
+fi
 
-# --- Desafío 2: La Aguja en el Pajar (Filtros) ---
+
+## --- Desafío 2: La Aguja en el Pajar (Filtros) --- ##
+if [[ "$DESAFIOS_SELECCIONADOS" == *"all"* ]] || [[ " $DESAFIOS_SELECCIONADOS " =~ " 2 " ]]; then
+
 echo "Configurando Desafío 2..."
+rm -rf logs_sistema
 mkdir -p logs_sistema
+
+# Diccionario de contraseñas obvias para despistar
+passwords_falsas=("ROOT" "ADMIN" "123456" "QWERTY" "admin123" "password" "root" "admin")
+
 # Generar 5000 líneas de log falso
 for i in {1..5000}; do
-    echo "INFO: Conexión establecida desde 192.168.1.$((RANDOM % 255)) - status: OK" >> logs_sistema/conexiones.log
+    if [ $((RANDOM % 100)) -eq 0 ]; then
+        fake_pwd="${passwords_falsas[$RANDOM % ${#passwords_falsas[@]}]}"
+        echo "WARNING: Intento sospechoso. $fake_pwd utilizada: Sigue buscando la bandera." >> logs_sistema/conexiones.log
+    else
+        echo "INFO: Conexion establecida desde 192.168.1.$((RANDOM % 255)) - status: OK" >> logs_sistema/conexiones.log
+    fi
 done
-# Insertar la bandera y la palabra PASSWORD en una línea aleatoria (ej. línea 3456)
-sed -i "3456i WARNING: Intento sospechoso. PASSWORD utilizada: FLAG{${PREFIX}_GR3P_M4ST3R_${SUFFIX}}" logs_sistema/conexiones.log
+# Insertar la bandera y la palabra PASSWORD en una línea aleatoria entre 3000 y 4000
+LINEA_INSERCION=$((RANDOM % 1001 + 3000))
+sed -i "${LINEA_INSERCION}i WARNING: Intento sospechoso. PASSWORD utilizada: FLAG{${PREFIX}_GR3P_M4ST3R_${SUFFIX}}" logs_sistema/conexiones.log
+fi
 
-# --- Desafío 3: El Rastro del Intruso (Redirección) ---
+
+## --- Desafío 3: El Rastro del Intruso (Redirección) --- ##
+if [[ "$DESAFIOS_SELECCIONADOS" == *"all"* ]] || [[ " $DESAFIOS_SELECCIONADOS " =~ " 3 " ]]; then
+
 echo "Configurando Desafío 3..."
+rm -rf servidor_web
 mkdir -p servidor_web
 # Generar un log de autenticaciones con intentos exitosos y fallidos
 FAILED_COUNT=0
-for i in {1..100}; do
-    if [ $((RANDOM % 10)) -eq 0 ]; then
+for i in {1..1000}; do
+    if [ $((RANDOM % 100)) -eq 0 ]; then
         echo "FAILED login from 10.0.0.$((RANDOM % 255)) - Pista del intruso" >> servidor_web/auth.log
         FAILED_COUNT=$((FAILED_COUNT + 1))
     else
@@ -89,9 +144,14 @@ else
 fi
 EOF
 chmod +x servidor_web/validar.sh
+fi
 
-# --- Desafío 4: Lo Invisible (Archivos Ocultos) ---
+
+## --- Desafío 4: Lo Invisible (Archivos Ocultos) --- ##
+if [[ "$DESAFIOS_SELECCIONADOS" == *"all"* ]] || [[ " $DESAFIOS_SELECCIONADOS " =~ " 4 " ]]; then
+
 echo "Configurando Desafío 4..."
+rm -rf sala_vacia
 mkdir -p sala_vacia
 
 # Archivos visibles (para despistar si solo usan 'ls')
@@ -106,9 +166,14 @@ echo "Modo de depuración: DESACTIVADO" > sala_vacia/.config_sistema
 # El archivo oculto real con la bandera y la pista
 echo "Bandera 4: FLAG{${PREFIX}_H1DD3N_S3CR3T_${SUFFIX}}" > sala_vacia/.llave_maestra
 echo "Pista adicional: La contraseña del usuario 'admin' es 'escape123'" >> sala_vacia/.llave_maestra
+fi
 
-# --- Desafío 5: ¿Quién soy? (Identidad y Usuarios) ---
+
+## --- Desafío 5: ¿Quién soy? (Identidad y Usuarios) --- ##
+if [[ "$DESAFIOS_SELECCIONADOS" == *"all"* ]] || [[ " $DESAFIOS_SELECCIONADOS " =~ " 5 " ]]; then
+
 echo "Configurando Desafío 5..."
+rm -rf boveda
 mkdir -p boveda
 echo "Bandera 5: FLAG{${PREFIX}_WH0_4M_1_4DM1N_${SUFFIX}}" > boveda/tesoro.txt
 
@@ -144,9 +209,14 @@ else
         RUTA_ACTUAL=$(dirname "$RUTA_ACTUAL")
     done
 fi
+fi
 
-# --- Desafío 6: Acceso Denegado (Permisos) ---
+
+## --- Desafío 6: Acceso Denegado (Permisos) --- ##
+if [[ "$DESAFIOS_SELECCIONADOS" == *"all"* ]] || [[ " $DESAFIOS_SELECCIONADOS " =~ " 6 " ]]; then
+
 echo "Configurando Desafío 6..."
+rm -rf panel_control
 mkdir -p panel_control
 cat << EOF > panel_control/reinicio_sistema.sh
 #!/bin/bash
@@ -157,6 +227,7 @@ echo "Bandera 6: FLAG{${PREFIX}_CHM0D_W1N_${SUFFIX}}"
 EOF
 # Quitar permisos de ejecución explícitamente para que deban usar chmod
 chmod -x panel_control/reinicio_sistema.sh
+fi
 
 # Volver al directorio padre para crear el archivo zip
 # cd ..
@@ -165,6 +236,8 @@ chmod -x panel_control/reinicio_sistema.sh
 
 echo "====================================================="
 echo "¡Ambiente creado exitosamente en el directorio '$BASE_DIR'!"
+
+cd ..
 }
 
 # Lista de todos los grupos horarios
@@ -177,6 +250,24 @@ GRUPOS=(
     "Horario_A11" "Horario_B11" "Colonia" "Salto" "Paysandu"
 )
 
+if [[ "$DESAFIOS_SELECCIONADOS" == *"all"* ]]; then
+    rm -rf "taller2"
+fi
+mkdir -p "taller2"
+cd "taller2" || exit 1
+
+NUM_JOBS=0
+
 for GRUPO in "${GRUPOS[@]}"; do
-    generar_ambiente "escape_room_ambiente_${GRUPO}"
+    generar_ambiente "escape_room_ambiente_${GRUPO}" &
+    ((NUM_JOBS++))
+    
+    # Esperar a que el lote actual termine antes de lanzar el siguiente
+    if (( NUM_JOBS % BATCH_SIZE == 0 )); then
+        wait
+    fi
 done
+
+# Esperar a que finalicen los procesos del último lote (si quedó alguno pendiente)
+wait
+echo "¡Todos los ambientes han sido generados en paralelo exitosamente!"
