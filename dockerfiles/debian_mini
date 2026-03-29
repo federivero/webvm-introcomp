@@ -28,10 +28,18 @@ RUN chown -R root:root \
     /home/user/taller2/*/sala_vacia \
     /home/user/taller2/*/servidor_web
 
-# chmod para actividades 3, 5 y 6
-RUN chmod 400 /home/user/taller2/*/boveda/tesoro.txt \
-    && chmod 000 /home/user/taller2/*/panel_control/reinicio_sistema.sh \
-    && chmod 111 /home/user/taller2/*/servidor_web/validar.sh
+# chmod para actividad 3
+RUN chmod 111 /home/user/taller2/*/servidor_web/validar.sh
+
+# chmod para actividad 5
+RUN chown -R admin:admin /home/user/taller2/*/boveda \
+    && chmod 755 /home/user/taller2/*/boveda \
+    && chmod 400 /home/user/taller2/*/boveda/tesoro.txt
+
+# chmod para actividad 6
+RUN chown -R admin:admin /home/user/taller2/*/panel_control \
+    && chmod 755 /home/user/taller2/*/panel_control \
+    && chmod 000 /home/user/taller2/*/panel_control/reinicio_sistema.sh
 
 # Replace su with a PAM-free version (PAM/TTY manipulation crashes WebVM)
 COPY ./dockerfiles/_su.c /tmp/_su.c
