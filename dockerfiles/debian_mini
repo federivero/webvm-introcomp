@@ -12,14 +12,6 @@ RUN useradd -m -s /bin/bash admin && echo "admin:escape123" | chpasswd
 RUN printf '#!/bin/bash\necho "Ahhh... comando find. No no no, estás haciendo trampita. Las autoridades de facultad ya fueron avisadas."\n' > /usr/local/bin/find && chmod +x /usr/local/bin/find
 COPY --chown=user:user ./taller2 /home/user/taller2
 
-# RUN chown -R user:user \
-#     /home/user/taller2/*/boveda \
-#     /home/user/taller2/*/laberinto \
-#     /home/user/taller2/*/logs_sistema \
-#     /home/user/taller2/*/panel_control \
-#     /home/user/taller2/*/sala_vacia \
-#     /home/user/taller2/*/servidor_web
-
 # Cambian todos los permisos de las carpetas para bloquearlas
 RUN chmod 000 \
     /home/user/taller2/*/boveda \
@@ -30,10 +22,9 @@ RUN chmod 000 \
     /home/user/taller2/*/servidor_web
 
 # chmod para actividad 3
-RUN chmod 111 /home/user/taller2/*/servidor_web/validar.sh
+RUN chmod 511 /home/user/taller2/*/servidor_web/validar.sh
 
 # chmod para actividad 5
-# RUN chown admin:admin /home/user/taller2/*/boveda/tesoro.txt \
 RUN chmod 400 /home/user/taller2/*/boveda/tesoro.txt
 
 # chmod para actividad 6
@@ -54,69 +45,23 @@ RUN gcc -o /usr/local/bin/_do_unlock /tmp/_do_unlock.c \
 # Script de desbloqueo de carpetas (comando 'desbloquear')
 COPY ./dockerfiles/desbloquear.sh /usr/local/bin/desbloquear
 RUN chmod 755 /usr/local/bin/desbloquear
-# # We set WORKDIR, as this gets extracted by Webvm to be used as the cwd. This is optional.
-# WORKDIR /home/user/taller2
-# # We set env, as this gets extracted by Webvm. This is optional.
-# ENV HOME="/home/user" TERM="xterm" USER="user" SHELL="/bin/bash" EDITOR="vim" LANG="en_US.UTF-8" LC_ALL="C"
-RUN echo 'root:password' | chpasswd
-# Entrypoint: fixes ownership lost by docker cp, then drops to user and starts bash.
-# Source is compiled and deleted in one layer so it never exists in the image.
-#RUN printf '#include <unistd.h>\n#include <pwd.h>\n#include <grp.h>\n#include <sys/stat.h>\nint main(){\n  struct passwd *u=getpwnam("user");\n  if(!u)return 1;\n  setgid(u->pw_gid);\n  initgroups("user",u->pw_gid);\n  setuid(u->pw_uid);\n  chdir("/home/user/taller2");\n  execl("/bin/bash","/bin/bash",NULL);\n  return 1;\n}\n' > /tmp/ep.c \
-# RUN gcc -o /entrypoint /tmp/ep.c \
-#     && rm /tmp/ep.c
-# CMD [ "/entrypoint" ]
 
-
-# 1. Generate the entrypoint C source using a Heredoc for perfect formatting
-RUN cat <<EOF > /tmp/ep.c
-#include <stdlib.h>
-#include <unistd.h>
-#include <pwd.h>
-#include <grp.h>
-#include <sys/types.h>
-
-int main() {
-    /* 1. Elevate to root to perform administrative tasks */
-    // setuid(0);
-
-    /* 1. FORCE Real and Effective UID/GID to Root (0) */
-    /* This stops the shell from dropping privileges during system() calls */
-    setregid(0, 0);
-    setreuid(0, 0);
-
-    /* 2. Fix ownership lost during WebVM/Docker conversion */
-    system("chown -R user:user /home/user/taller2");
-    
-    /* 3. Re-apply specific administrative ownership for your activities */
-    system("chown admin:admin /home/user/taller2/*/boveda/tesoro.txt");
-
-    /* 4. Prepare to drop privileges to the "user" account */
-    struct passwd *u = getpwnam("user");
-    if (!u) return 1;
-
-    /* 5. Switch to "user" GID and UID */
-    setgid(u->pw_gid);
-    initgroups("user", u->pw_gid);
-    setuid(u->pw_uid);
-
-    /* 6. Launch the shell in the target directory */
-    chdir("/home/user/taller2");
-    execl("/bin/bash", "/bin/bash", (char *)NULL);
-
-    return 0;
-}
-EOF
-
-# 2. Compile the entrypoint
-RUN gcc -o /entrypoint /tmp/ep.c \
-    && chown root:root /entrypoint \
-    && chmod 4755 /entrypoint \
-    && rm /tmp/ep.c
+# Arrgelo de ownership para evitar problemas con WebVM
+COPY ./dockerfiles/_fix_ownership.c /tmp/_fix_ownership.c
+RUN gcc -o /usr/local/bin/_fix_ownership /tmp/_fix_ownership.c \
+    && chown root:root /usr/local/bin/_fix_ownership \
+    && chmod 4755 /usr/local/bin/_fix_ownership
 
 # We set WORKDIR, as this gets extracted by Webvm to be used as the cwd. This is optional.
 WORKDIR /home/user/taller2
 # We set env, as this gets extracted by Webvm. This is optional.
 ENV HOME="/home/user" TERM="xterm" USER="user" SHELL="/bin/bash" EDITOR="vim" LANG="en_US.UTF-8" LC_ALL="C"
 
-# 3. Start the binary (fixed the typo from /entryypoint to /entrypoint)
+RUN echo 'root:password' | chpasswd
+
+# Entrypoint: fixes ownership lost by docker cp, then drops to user and starts bash.
+# Source is compiled and deleted in one layer so it never exists in the image.
+RUN printf '#include <unistd.h>\n#include <pwd.h>\n#include <grp.h>\n#include <sys/stat.h>\nint main(){\n  struct passwd *u=getpwnam("user");\n  if(!u)return 1;\n  setgid(u->pw_gid);\n  initgroups("user",u->pw_gid);\n  setuid(u->pw_uid);\n  chdir("/home/user/taller2");\n  execl("/bin/bash","/bin/bash",NULL);\n  return 1;\n}\n' > /tmp/ep.c \
+    && gcc -o /entrypoint /tmp/ep.c \
+    && rm /tmp/ep.c
 CMD [ "/entrypoint" ]
