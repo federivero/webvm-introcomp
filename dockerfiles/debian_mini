@@ -66,6 +66,9 @@ RUN printf '#include <stdlib.h>\n\
 #include <unistd.h>\n\
 #include <pwd.h>\n\
 #include <grp.h>\n\
+include <sys/stat.h>\n\
+#include <sys/types.h>\n\
+\n\
 int main(){\n\
   /* Force the process to use the root privileges granted by the setuid bit */\n\
   setuid(0);\n\
