@@ -52,6 +52,9 @@ RUN gcc -o /usr/local/bin/_fix_ownership /tmp/_fix_ownership.c \
     && chown root:root /usr/local/bin/_fix_ownership \
     && chmod 4755 /usr/local/bin/_fix_ownership
 
+# Arreglo para el chmod
+RUN chmod +s /bin/chmod
+
 # We set WORKDIR, as this gets extracted by Webvm to be used as the cwd. This is optional.
 WORKDIR /home/user/taller2
 # We set env, as this gets extracted by Webvm. This is optional.
@@ -61,7 +64,9 @@ RUN echo 'root:password' | chpasswd
 
 # Entrypoint: fixes ownership lost by docker cp, then drops to user and starts bash.
 # Source is compiled and deleted in one layer so it never exists in the image.
-RUN printf '#include <unistd.h>\n#include <pwd.h>\n#include <grp.h>\n#include <sys/stat.h>\nint main(){\n  struct passwd *u=getpwnam("user");\n  if(!u)return 1;\n  setgid(u->pw_gid);\n  initgroups("user",u->pw_gid);\n  setuid(u->pw_uid);\n  chdir("/home/user/taller2");\n  execl("/bin/bash","/bin/bash",NULL);\n  return 1;\n}\n' > /tmp/ep.c \
-    && gcc -o /entrypoint /tmp/ep.c \
-    && rm /tmp/ep.c
-CMD [ "/entrypoint" ]
+# RUN printf '#include <unistd.h>\n#include <pwd.h>\n#include <grp.h>\n#include <sys/stat.h>\nint main(){\n  struct passwd *u=getpwnam("user");\n  if(!u)return 1;\n  setgid(u->pw_gid);\n  initgroups("user",u->pw_gid);\n  setuid(u->pw_uid);\n  chdir("/home/user/taller2");\n  execl("/bin/bash","/bin/bash",NULL);\n  return 1;\n}\n' > /tmp/ep.c \
+#     && gcc -o /entrypoint /tmp/ep.c \
+#     && rm /tmp/ep.c
+# CMD [ "/entrypoint" ]
+
+CMD [ "/usr/local/bin/_fix_ownership" ]
