@@ -62,34 +62,52 @@ RUN echo 'root:password' | chpasswd
 # Entrypoint: fixes ownership lost by docker cp, then drops to user and starts bash.
 # Source is compiled and deleted in one layer so it never exists in the image.
 #RUN printf '#include <unistd.h>\n#include <pwd.h>\n#include <grp.h>\n#include <sys/stat.h>\nint main(){\n  struct passwd *u=getpwnam("user");\n  if(!u)return 1;\n  setgid(u->pw_gid);\n  initgroups("user",u->pw_gid);\n  setuid(u->pw_uid);\n  chdir("/home/user/taller2");\n  execl("/bin/bash","/bin/bash",NULL);\n  return 1;\n}\n' > /tmp/ep.c \
-RUN printf '#include <stdlib.h>\n\
-#include <unistd.h>\n\
-#include <pwd.h>\n\
-#include <grp.h>\n\
-#include <sys/stat.h>\n\
-#include <sys/types.h>\n\
-\n\
-int main(){\n\
-  /* Force the process to use the root privileges granted by the setuid bit */\n\
-  setuid(0);\n\
-\n\
-  /* Now we have the power to fix ownership */\n\
-  system("chown -R user:user /home/user/taller2");\n\
-  system("chown admin:admin /home/user/taller2/*/boveda/tesoro.txt");\n\
-\n\
-  /* Now we find our target user to drop privileges */\n\
-  struct passwd *u = getpwnam("user");\n\
-  if(!u) return 1;\n\
-\n\
-  /* Drop privileges back to "user" before opening the shell */\n\
-  setgid(u->pw_gid);\n\
-  initgroups("user", u->pw_gid);\n\
-  setuid(u->pw_uid);\n\
-\n\
-  chdir("/home/user/taller2");\n\
-  execl("/bin/bash", "/bin/bash", NULL);\n\
-  return 0;\n\
-}\n' > /tmp/ep.c
+# RUN gcc -o /entrypoint /tmp/ep.c \
+#     && rm /tmp/ep.c
+# CMD [ "/entrypoint" ]
+
+
+# 1. Generate the entrypoint C source using a Heredoc for perfect formatting
+RUN cat <<EOF > /tmp/ep.c
+#include <stdlib.h>
+#include <unistd.h>
+#include <pwd.h>
+#include <grp.h>
+#include <sys/types.h>
+
+int main() {
+    /* 1. Elevate to root to perform administrative tasks */
+    setuid(0);
+
+    /* 2. Fix ownership lost during WebVM/Docker conversion */
+    system("chown -R user:user /home/user/taller2");
+    
+    /* 3. Re-apply specific administrative ownership for your activities */
+    system("chown admin:admin /home/user/taller2/*/boveda/tesoro.txt");
+    system("chown admin:admin /home/user/taller2/*/panel_control/reinicio_sistema.sh");
+
+    /* 4. Prepare to drop privileges to the "user" account */
+    struct passwd *u = getpwnam("user");
+    if (!u) return 1;
+
+    /* 5. Switch to "user" GID and UID */
+    setgid(u->pw_gid);
+    initgroups("user", u->pw_gid);
+    setuid(u->pw_uid);
+
+    /* 6. Launch the shell in the target directory */
+    chdir("/home/user/taller2");
+    execl("/bin/bash", "/bin/bash", (char *)NULL);
+
+    return 0;
+}
+EOF
+
+# 2. Compile the entrypoint
 RUN gcc -o /entrypoint /tmp/ep.c \
+    && chown root:root /entrypoint \
+    && chmod 4755 /entrypoint \
     && rm /tmp/ep.c
-CMD [ "/entryypoint" ]
+
+# 3. Start the binary (fixed the typo from /entryypoint to /entrypoint)
+CMD [ "/entrypoint" ]
