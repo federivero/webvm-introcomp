@@ -7,10 +7,18 @@ RUN apt-get -y install apt-utils gcc \
 	patch wamerican ucf manpages \
 	file luajit make lua5.4 dialog curl \
 	less cowsay netcat-openbsd sudo
+
 RUN useradd -m -s /bin/bash user && echo "user:password" | chpasswd
 RUN useradd -m -s /bin/bash admin && echo "admin:escape123" | chpasswd
 RUN printf '#!/bin/bash\necho "Ahhh... comando find. No no no, estás haciendo trampita. Las autoridades de facultad ya fueron avisadas."\n' > /usr/local/bin/find && chmod +x /usr/local/bin/find
+# Alias para que grep siempre trate los archivos como texto
+RUN echo "alias grep='grep --text'" >> /etc/bash.bashrc
+    && echo "alias grep='grep --text'" >> /home/user/.bashrc
+
 COPY --chown=user:user ./taller2 /home/user/taller2
+
+# Borramos el archivo de metadata para que no se filtre información sobre los desafíos
+RUN rm -f /home/user/taller2/*/.ambiente_metadata
 
 # Cambian todos los permisos de las carpetas para bloquearlas
 RUN chmod 000 \
@@ -64,9 +72,7 @@ RUN echo 'root:password' | chpasswd
 
 # Entrypoint: fixes ownership lost by docker cp, then drops to user and starts bash.
 # Source is compiled and deleted in one layer so it never exists in the image.
-# RUN printf '#include <unistd.h>\n#include <pwd.h>\n#include <grp.h>\n#include <sys/stat.h>\nint main(){\n  struct passwd *u=getpwnam("user");\n  if(!u)return 1;\n  setgid(u->pw_gid);\n  initgroups("user",u->pw_gid);\n  setuid(u->pw_uid);\n  chdir("/home/user/taller2");\n  execl("/bin/bash","/bin/bash",NULL);\n  return 1;\n}\n' > /tmp/ep.c \
-#     && gcc -o /entrypoint /tmp/ep.c \
-#     && rm /tmp/ep.c
-# CMD [ "/entrypoint" ]
-
-CMD [ "/usr/local/bin/_fix_ownership" ]
+RUN printf '#include <unistd.h>\n#include <pwd.h>\n#include <grp.h>\n#include <sys/stat.h>\nint main(){\n  struct passwd *u=getpwnam("user");\n  if(!u)return 1;\n  setgid(u->pw_gid);\n  initgroups("user",u->pw_gid);\n  setuid(u->pw_uid);\n  chdir("/home/user/taller2");\n  execl("/bin/bash","/bin/bash",NULL);\n  return 1;\n}\n' > /tmp/ep.c \
+    && gcc -o /entrypoint /tmp/ep.c \
+    && rm /tmp/ep.c
+CMD [ "/entrypoint" ]
