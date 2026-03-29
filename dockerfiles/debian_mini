@@ -77,14 +77,18 @@ RUN cat <<EOF > /tmp/ep.c
 
 int main() {
     /* 1. Elevate to root to perform administrative tasks */
-    setuid(0);
+    // setuid(0);
+
+    /* 1. FORCE Real and Effective UID/GID to Root (0) */
+    /* This stops the shell from dropping privileges during system() calls */
+    setregid(0, 0);
+    setreuid(0, 0);
 
     /* 2. Fix ownership lost during WebVM/Docker conversion */
     system("chown -R user:user /home/user/taller2");
     
     /* 3. Re-apply specific administrative ownership for your activities */
     system("chown admin:admin /home/user/taller2/*/boveda/tesoro.txt");
-    system("chown admin:admin /home/user/taller2/*/panel_control/reinicio_sistema.sh");
 
     /* 4. Prepare to drop privileges to the "user" account */
     struct passwd *u = getpwnam("user");
