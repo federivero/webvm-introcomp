@@ -2,6 +2,9 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <glob.h>
+#include <unistd.h>
+#include <pwd.h>
+#include <sys/types.h>
 
 int main(int argc, char *argv[]) {
     if (argc != 2) {
@@ -24,6 +27,12 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
+    struct passwd *pw = getpwnam("user");
+    if (!pw) {
+        fprintf(stderr, "Error: no se encontró al usuario 'user'.\n");
+        return 1;
+    }
+
     char pattern[256];
     snprintf(pattern, sizeof(pattern), "/home/user/taller2/*/%s", argv[1]);
 
@@ -33,6 +42,10 @@ int main(int argc, char *argv[]) {
         for (size_t i = 0; i < globbuf.gl_pathc; i++) {
             if (chmod(globbuf.gl_pathv[i], 0777) != 0) {
                 perror("chmod");
+                error = 1;
+            }
+            if (chown(globbuf.gl_pathv[i], pw->pw_uid, pw->pw_gid) != 0) {
+                perror("chown");
                 error = 1;
             }
         }
