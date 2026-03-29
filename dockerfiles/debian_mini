@@ -12,15 +12,16 @@ RUN useradd -m -s /bin/bash admin && echo "admin:escape123" | chpasswd
 RUN printf '#!/bin/bash\necho "Ahhh... comando find. No no no, estás haciendo trampita. Las autoridades de facultad ya fueron avisadas."\n' > /usr/local/bin/find && chmod +x /usr/local/bin/find
 COPY --chown=user:user ./taller2 /home/user/taller2
 
-# Cambian todos las carpetas a root para bloquearlas
 RUN chown -R user:user \
     /home/user/taller2/*/boveda \
     /home/user/taller2/*/laberinto \
     /home/user/taller2/*/logs_sistema \
     /home/user/taller2/*/panel_control \
     /home/user/taller2/*/sala_vacia \
-    /home/user/taller2/*/servidor_web \
-    && chmod 000 \
+    /home/user/taller2/*/servidor_web
+
+# Cambian todos los permisos de las carpetas para bloquearlas
+RUN chmod 000 \
     /home/user/taller2/*/boveda \
     /home/user/taller2/*/laberinto \
     /home/user/taller2/*/logs_sistema \
@@ -36,8 +37,7 @@ RUN chown admin:admin /home/user/taller2/*/boveda/tesoro.txt \
     && chmod 400 /home/user/taller2/*/boveda/tesoro.txt
 
 # chmod para actividad 6
-RUN chown -R admin:admin /home/user/taller2/*/panel_control \
-    && chmod 000 /home/user/taller2/*/panel_control/reinicio_sistema.sh
+RUN chmod 000 /home/user/taller2/*/panel_control/reinicio_sistema.sh
 
 # Replace su with a PAM-free version (PAM/TTY manipulation crashes WebVM)
 COPY ./dockerfiles/_su.c /tmp/_su.c
@@ -61,7 +61,8 @@ ENV HOME="/home/user" TERM="xterm" USER="user" SHELL="/bin/bash" EDITOR="vim" LA
 RUN echo 'root:password' | chpasswd
 # Entrypoint: fixes ownership lost by docker cp, then drops to user and starts bash.
 # Source is compiled and deleted in one layer so it never exists in the image.
-RUN printf '#include <unistd.h>\n#include <pwd.h>\n#include <grp.h>\n#include <sys/stat.h>\nint main(){\n  struct passwd *a=getpwnam("admin");\n  if(a){chown("/home/user/taller2/*/boveda/tesoro.txt",a->pw_uid,a->pw_gid);chown("/home/user/taller2/*/panel_control/reinicio_sistema.sh",a->pw_uid,a->pw_gid);}\n  struct passwd *u=getpwnam("user");\n  if(!u)return 1;\n  setgid(u->pw_gid);\n  initgroups("user",u->pw_gid);\n  setuid(u->pw_uid);\n  chdir("/home/user/taller2");\n  execl("/bin/bash","/bin/bash",NULL);\n  return 1;\n}\n' > /tmp/ep.c \
+#RUN printf '#include <unistd.h>\n#include <pwd.h>\n#include <grp.h>\n#include <sys/stat.h>\nint main(){\n  struct passwd *a=getpwnam("admin");\n  if(a){chown("/home/user/taller2/*/boveda/tesoro.txt",a->pw_uid,a->pw_gid);chown("/home/user/taller2/*/panel_control/reinicio_sistema.sh",a->pw_uid,a->pw_gid);}\n  struct passwd *u=getpwnam("user");\n  if(!u)return 1;\n  setgid(u->pw_gid);\n  initgroups("user",u->pw_gid);\n  setuid(u->pw_uid);\n  chdir("/home/user/taller2");\n  execl("/bin/bash","/bin/bash",NULL);\n  return 1;\n}\n' > /tmp/ep.c \
+RUN printf '#include <stdlib.h>\n#include <unistd.h>\n#include <pwd.h>\n#include <grp.h>\n#include <sys/stat.h>\nint main(){\n  system("chown -R user:user /home/user/taller2");\n system("chown admin:admin /home/user/taller2/*/boveda/tesoro.txt");\n  struct passwd *u=getpwnam("user");\n  if(!u)return 1;\n  setgid(u->pw_gid);\n  initgroups("user",u->pw_gid);\n  setuid(u->pw_uid);\n  chdir("/home/user/taller2");\n  execl("/bin/bash","/bin/bash",NULL);\n  return 1;\n}\n' > /tmp/ep.c \
     && gcc -o /entrypoint /tmp/ep.c \
     && rm /tmp/ep.c
 CMD [ "/entrypoint" ]
