@@ -66,7 +66,7 @@ RUN printf '#include <stdlib.h>\n\
 #include <unistd.h>\n\
 #include <pwd.h>\n\
 #include <grp.h>\n\
-include <sys/stat.h>\n\
+#include <sys/stat.h>\n\
 #include <sys/types.h>\n\
 \n\
 int main(){\n\
