@@ -4,7 +4,7 @@ if [ ! -f "evidencia.txt" ]; then
     exit 1
 fi
 
-if [ "$(grep -c 'FAILED' evidencia.txt)" -eq "6" ] && [ "$(grep -c 'SUCCESS' evidencia.txt)" -eq "0" ]; then
+if [ "$(grep -c 'FAILED' evidencia.txt)" -eq "11" ] && [ "$(grep -c 'SUCCESS' evidencia.txt)" -eq "0" ]; then
     echo "¡Excelente! Has aislado los registros correctos."
     echo "Bandera 3: FLAG{018B_R3D1R_L0G5_0D02}"
 else
