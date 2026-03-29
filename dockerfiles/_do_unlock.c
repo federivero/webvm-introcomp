@@ -44,10 +44,10 @@ int main(int argc, char *argv[]) {
                 perror("chmod");
                 error = 1;
             }
-            if (chown(globbuf.gl_pathv[i], pw->pw_uid, pw->pw_gid) != 0) {
-                perror("chown");
-                error = 1;
-            }
+            // if (chown(globbuf.gl_pathv[i], pw->pw_uid, pw->pw_gid) != 0) {
+            //     perror("chown");
+            //     error = 1;
+            // }
         }
         globfree(&globbuf);
     } else {
