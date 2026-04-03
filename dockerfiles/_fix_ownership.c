@@ -11,11 +11,24 @@ int main(int argc, char *argv[]) {
     setregid(0, 0);
     setreuid(0, 0);
 
+    char target_dir[256] = "/home/user/taller2";
+    char cmd_chown_user[512];
+    char cmd_chown_admin[512];
+
+    if (argc == 2) {
+        snprintf(target_dir, sizeof(target_dir), "/home/user/taller2/%s", argv[1]);
+        snprintf(cmd_chown_user, sizeof(cmd_chown_user), "chown -R user:user %s", target_dir);
+        snprintf(cmd_chown_admin, sizeof(cmd_chown_admin), "chown admin:admin %s/boveda/tesoro.txt", target_dir);
+    } else {
+        snprintf(cmd_chown_user, sizeof(cmd_chown_user), "chown -R user:user /home/user/taller2");
+        snprintf(cmd_chown_admin, sizeof(cmd_chown_admin), "chown admin:admin /home/user/taller2/*/boveda/tesoro.txt");
+    }
+
     /* 2. Fix ownership lost during WebVM/Docker conversion */
-    system("chown -R user:user /home/user/taller2");
+    system(cmd_chown_user);
     
     /* 3. Re-apply specific administrative ownership for your activities */
-    system("chown admin:admin /home/user/taller2/*/boveda/tesoro.txt");
+    system(cmd_chown_admin);
 
     /* 4. Prepare to drop privileges to the "user" account */
     struct passwd *u = getpwnam("user");
@@ -27,10 +40,6 @@ int main(int argc, char *argv[]) {
     setuid(u->pw_uid);
 
     /* 6. Launch the shell in the target directory */
-    char target_dir[256] = "/home/user/taller2";
-    if (argc == 2) {
-        snprintf(target_dir, sizeof(target_dir), "/home/user/taller2/%s", argv[1]);
-    }
     chdir(target_dir);
     execl("/bin/bash", "/bin/bash", (char *)NULL);
 
