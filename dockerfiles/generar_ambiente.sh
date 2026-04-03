@@ -128,22 +128,76 @@ for i in {1..1000}; do
     fi
 done
 
-# Crear script validador para entregar la bandera
-cat << EOF > servidor_web/validar.sh
-#!/bin/bash
-if [ ! -f "evidencia.txt" ]; then
-    echo "Error: No se encontró el archivo 'evidencia.txt'. Recuerda usar la redirección (>)."
-    exit 1
-fi
+# Guardar la cantidad de fallos generada dinámicamente
+echo "FAILED_COUNT=$FAILED_COUNT" >> .ambiente_metadata
 
-if [ "\$(grep -c 'FAILED' evidencia.txt)" -eq "$FAILED_COUNT" ] && [ "\$(grep -c 'SUCCESS' evidencia.txt)" -eq "0" ]; then
-    echo "¡Excelente! Has aislado los registros correctos."
-    echo "Bandera 3: FLAG{${PREFIX}_R3D1R_L0G5_${SUFFIX}}"
-else
-    echo "El archivo 'evidencia.txt' no contiene exactamente los registros fallidos. ¡Revisa tu filtro!"
-fi
+# Crear el código fuente en C para el ejecutable validador
+cat << 'EOF' > servidor_web/validar.c
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+// Lee una variable del archivo de metadatos para mantener las banderas dinámicas
+void get_meta_var(const char *var_name_eq, char *buffer, size_t buffer_size) {
+    FILE *fp = fopen("../../.ambiente_metadata", "r");
+    if (fp == NULL) {
+        strncpy(buffer, "XXXX", buffer_size - 1);
+        buffer[buffer_size - 1] = '\0';
+        return;
+    }
+    char line[256];
+    size_t var_len = strlen(var_name_eq);
+    while (fgets(line, sizeof(line), fp)) {
+        if (strncmp(line, var_name_eq, var_len) == 0) {
+            char *value = line + var_len;
+            value[strcspn(value, "\r\n")] = 0; // Quitar salto de línea
+            strncpy(buffer, value, buffer_size - 1);
+            buffer[buffer_size - 1] = '\0';
+            fclose(fp);
+            return;
+        }
+    }
+    strncpy(buffer, "YYYY", buffer_size - 1); // Fallback si no se encuentra
+    buffer[buffer_size - 1] = '\0';
+    fclose(fp);
+}
+
+int count_occurrences(const char *filename, const char *word) {
+    FILE *fp = fopen(filename, "r");
+    if (!fp) return -1;
+    char line[1024];
+    int count = 0;
+    while (fgets(line, sizeof(line), fp)) {
+        if (strstr(line, word) != NULL) count++;
+    }
+    fclose(fp);
+    return count;
+}
+
+int main() {
+    FILE *f = fopen("evidencia.txt", "r");
+    if (!f) {
+        printf("Error: No se encontró el archivo 'evidencia.txt'. Recuerda usar la redirección (>).\n");
+        return 1;
+    }
+    fclose(f);
+
+    char failed_str[16];
+    get_meta_var("FAILED_COUNT=", failed_str, sizeof(failed_str));
+    int expected_failed = atoi(failed_str);
+
+    if (count_occurrences("evidencia.txt", "FAILED") == expected_failed && count_occurrences("evidencia.txt", "SUCCESS") == 0) {
+        char prefix[16], suffix[16];
+        get_meta_var("PREFIX=", prefix, sizeof(prefix));
+        get_meta_var("SUFFIX=", suffix, sizeof(suffix));
+        printf("¡Excelente! Has aislado los registros correctos.\n");
+        printf("Bandera 3: FLAG{%s_R3D1R_L0G5_%s}\n", prefix, suffix);
+    } else {
+        printf("El archivo 'evidencia.txt' no contiene exactamente los registros fallidos. ¡Revisa tu filtro!\n");
+    }
+    return 0;
+}
 EOF
-chmod +x servidor_web/validar.sh
 fi
 
 
@@ -218,16 +272,63 @@ if [[ "$DESAFIOS_SELECCIONADOS" == *"all"* ]] || [[ " $DESAFIOS_SELECCIONADOS " 
 echo "Configurando Desafío 6..."
 rm -rf panel_control
 mkdir -p panel_control
-cat << EOF > panel_control/reinicio_sistema.sh
-#!/bin/bash
-echo "Iniciando secuencia de reinicio..."
-sleep 1
-echo "Sistemas restaurados. ¡Felicidades, salvaste los datos!"
-echo "Bandera 6: FLAG{${PREFIX}_CHM0D_W1N_${SUFFIX}}"
+
+# Crear el código fuente en C para el ejecutable de reinicio
+cat << 'EOF' > panel_control/reinicio_sistema.c
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+
+// Lee una variable del archivo de metadatos para mantener las banderas dinámicas
+void get_meta_var(const char *var_name_eq, char *buffer, size_t buffer_size) {
+    // La ruta es relativa al ejecutable, que estará en panel_control/
+    FILE *fp = fopen("../../.ambiente_metadata", "r");
+    if (fp == NULL) {
+        strncpy(buffer, "XXXX", buffer_size - 1);
+        buffer[buffer_size - 1] = '\0';
+        return;
+    }
+
+    char line[256];
+    size_t var_len = strlen(var_name_eq);
+    while (fgets(line, sizeof(line), fp)) {
+        if (strncmp(line, var_name_eq, var_len) == 0) {
+            char *value = line + var_len;
+            value[strcspn(value, "\r\n")] = 0; // Quitar salto de línea
+            strncpy(buffer, value, buffer_size - 1);
+            buffer[buffer_size - 1] = '\0';
+            fclose(fp);
+            return;
+        }
+    }
+
+    strncpy(buffer, "YYYY", buffer_size - 1); // Fallback si no se encuentra
+    buffer[buffer_size - 1] = '\0';
+    fclose(fp);
+}
+
+int main() {
+    char prefix[16], suffix[16];
+    get_meta_var("PREFIX=", prefix, sizeof(prefix));
+    get_meta_var("SUFFIX=", suffix, sizeof(suffix));
+
+    printf("Iniciando secuencia de reinicio...\n");
+    fflush(stdout);
+    sleep(1);
+    printf("Sistemas restaurados. ¡Felicidades, salvaste los datos!\n");
+    printf("Bandera 6: FLAG{%s_CHM0D_W1N_%s}\n", prefix, suffix);
+
+    return 0;
+}
 EOF
-# Quitar permisos de ejecución explícitamente para que deban usar chmod
-chmod -x panel_control/reinicio_sistema.sh
 fi
+
+# Crear script inicializar.sh para invocar _fix_ownership en este horario
+cat << EOF > inicializar.sh
+#!/bin/bash
+/usr/local/bin/_fix_ownership "$BASE_DIR"
+EOF
 
 # Volver al directorio padre para crear el archivo zip
 # cd ..

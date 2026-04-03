@@ -1,10 +1,11 @@
 #include <stdlib.h>
+#include <stdio.h>
 #include <unistd.h>
 #include <pwd.h>
 #include <grp.h>
 #include <sys/types.h>
 
-int main() {
+int main(int argc, char *argv[]) {
     /* 1. FORCE Real and Effective UID/GID to Root (0) */
     /* This stops the shell from dropping privileges during system() calls */
     setregid(0, 0);
@@ -26,7 +27,11 @@ int main() {
     setuid(u->pw_uid);
 
     /* 6. Launch the shell in the target directory */
-    chdir("/home/user/taller2");
+    char target_dir[256] = "/home/user/taller2";
+    if (argc == 2) {
+        snprintf(target_dir, sizeof(target_dir), "/home/user/taller2/%s", argv[1]);
+    }
+    chdir(target_dir);
     execl("/bin/bash", "/bin/bash", (char *)NULL);
 
     return 0;
