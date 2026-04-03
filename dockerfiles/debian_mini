@@ -24,7 +24,7 @@ RUN echo "alias grep='grep --text'" >> /etc/bash.bashrc \
 COPY --chown=user:user ./taller2 /home/user/taller2
 
 # Permisos de solo lectura para el archivo de metadata
-RUN chmod 555 /home/user/taller2/*/.meta \
+RUN chmod 111 /home/user/taller2/*/.meta \
     && chmod 444 /home/user/taller2/*/.meta/.ambiente_metadata
 
 # Cambian todos los permisos de las carpetas para bloquearlas
