@@ -23,14 +23,9 @@ RUN echo "alias grep='grep --text'" >> /etc/bash.bashrc \
 # Copiamos el taller al directorio del usuario
 COPY --chown=user:user ./taller2 /home/user/taller2
 
-# Borramos el archivo inicializar.sh (copiado por error en el taller) para evitar confusiones, ya que ahora se encuentra en /usr/local/bin/inicializar
-RUN rm -f /home/user/taller2/*/inicializar.sh
-
-# Borramos el archivo de metadata para que no se filtre información sobre los desafíos
-# RUN rm -f /home/user/taller2/*/.ambiente_metadata
-
 # Permisos de solo lectura para el archivo de metadata
-RUN chmod 444 /home/user/taller2/*/.ambiente_metadata
+RUN chmod 555 /home/user/taller2/*/.meta \
+    && chmod 444 /home/user/taller2/*/.meta/.ambiente_metadata
 
 # Cambian todos los permisos de las carpetas para bloquearlas
 RUN chmod 000 \
