@@ -26,11 +26,12 @@ COPY --chown=user:user ./taller2 /home/user/taller2
 # Borramos el archivo de metadata para que no se filtre información sobre los desafíos
 # RUN rm -f /home/user/taller2/*/.ambiente_metadata
 
-# Damos permisos de ejecución al script de inicialización
-RUN chmod 555 /home/user/taller2/*/inicializar.sh
+# Permisos de solo lectura para el archivo de metadata
+RUN chmod 444 /home/user/taller2/*/.ambiente_metadata
 
 # Cambian todos los permisos de las carpetas para bloquearlas
 RUN chmod 000 \
+    /home/user/taller2 \
     /home/user/taller2/*/boveda \
     /home/user/taller2/*/laberinto \
     /home/user/taller2/*/logs_sistema \
@@ -80,6 +81,10 @@ COPY ./dockerfiles/_fix_ownership.c /tmp/_fix_ownership.c
 RUN gcc -o /usr/local/bin/_fix_ownership /tmp/_fix_ownership.c \
     && chown root:root /usr/local/bin/_fix_ownership \
     && chmod 4755 /usr/local/bin/_fix_ownership
+
+# Damos permisos de ejecución al script de inicialización
+COPY ./dockerfiles/inicializar.sh /usr/local/bin/inicializar
+RUN chmod 755 /usr/local/bin/inicializar
 
 # Arreglo para el chmod
 RUN chmod +s /bin/chmod

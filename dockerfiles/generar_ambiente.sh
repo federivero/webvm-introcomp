@@ -139,7 +139,7 @@ cat << 'EOF' > servidor_web/validar.c
 
 // Lee una variable del archivo de metadatos para mantener las banderas dinámicas
 void get_meta_var(const char *var_name_eq, char *buffer, size_t buffer_size) {
-    FILE *fp = fopen("../../.ambiente_metadata", "r");
+    FILE *fp = fopen("../.ambiente_metadata", "r");
     if (fp == NULL) {
         strncpy(buffer, "XXXX", buffer_size - 1);
         buffer[buffer_size - 1] = '\0';
@@ -283,7 +283,7 @@ cat << 'EOF' > panel_control/reinicio_sistema.c
 // Lee una variable del archivo de metadatos para mantener las banderas dinámicas
 void get_meta_var(const char *var_name_eq, char *buffer, size_t buffer_size) {
     // La ruta es relativa al ejecutable, que estará en panel_control/
-    FILE *fp = fopen("../../.ambiente_metadata", "r");
+    FILE *fp = fopen("../.ambiente_metadata", "r");
     if (fp == NULL) {
         strncpy(buffer, "XXXX", buffer_size - 1);
         buffer[buffer_size - 1] = '\0';
@@ -316,6 +316,12 @@ int main() {
     printf("Iniciando secuencia de reinicio...\n");
     fflush(stdout);
     sleep(1);
+    printf("Apagando servicios...\n");
+    fflush(stdout);
+    sleep(1);
+    printf("Reiniciando sistema...\n");
+    fflush(stdout);
+    sleep(2);
     printf("Sistemas restaurados. ¡Felicidades, salvaste los datos!\n");
     printf("Bandera 6: FLAG{%s_CHM0D_W1N_%s}\n", prefix, suffix);
 
@@ -323,12 +329,6 @@ int main() {
 }
 EOF
 fi
-
-# Crear script inicializar.sh para invocar _fix_ownership en este horario
-cat << EOF > inicializar.sh
-#!/bin/bash
-/usr/local/bin/_fix_ownership "$BASE_DIR"
-EOF
 
 # Volver al directorio padre para crear el archivo zip
 # cd ..
