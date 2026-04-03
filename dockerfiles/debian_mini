@@ -27,7 +27,7 @@ COPY --chown=user:user ./taller2 /home/user/taller2
 # RUN rm -f /home/user/taller2/*/.ambiente_metadata
 
 # Damos permisos de ejecución al script de inicialización
-RUN chmod 511 inicializar.sh
+RUN chmod 511 /home/user/taller2/*/inicializar.sh
 
 # Cambian todos los permisos de las carpetas para bloquearlas
 RUN chmod 000 \
