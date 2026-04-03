@@ -1,2 +1,0 @@
-¡Me encontraste! Has demostrado que sabes navegar.
-Bandera 1: FLAG{0632_NAV_3XP3RT_453C}

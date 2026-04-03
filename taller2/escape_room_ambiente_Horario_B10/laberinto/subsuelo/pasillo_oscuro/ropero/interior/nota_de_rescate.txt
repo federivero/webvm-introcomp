@@ -1,0 +1,2 @@
+¡Me encontraste! Has demostrado que sabes navegar.
+Bandera 1: FLAG{32DF_NAV_3XP3RT_2AFF}

@@ -6,7 +6,7 @@
 // Lee una variable del archivo de metadatos para mantener las banderas dinámicas
 void get_meta_var(const char *var_name_eq, char *buffer, size_t buffer_size) {
     // La ruta es relativa al ejecutable, que estará en panel_control/
-    FILE *fp = fopen("../../.ambiente_metadata", "r");
+    FILE *fp = fopen("../.meta/.ambiente_metadata", "r");
     if (fp == NULL) {
         strncpy(buffer, "XXXX", buffer_size - 1);
         buffer[buffer_size - 1] = '\0';
@@ -39,6 +39,12 @@ int main() {
     printf("Iniciando secuencia de reinicio...\n");
     fflush(stdout);
     sleep(1);
+    printf("Apagando servicios...\n");
+    fflush(stdout);
+    sleep(1);
+    printf("Reiniciando sistema...\n");
+    fflush(stdout);
+    sleep(2);
     printf("Sistemas restaurados. ¡Felicidades, salvaste los datos!\n");
     printf("Bandera 6: FLAG{%s_CHM0D_W1N_%s}\n", prefix, suffix);
 

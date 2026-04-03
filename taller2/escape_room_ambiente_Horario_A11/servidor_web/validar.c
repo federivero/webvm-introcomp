@@ -4,7 +4,7 @@
 
 // Lee una variable del archivo de metadatos para mantener las banderas dinámicas
 void get_meta_var(const char *var_name_eq, char *buffer, size_t buffer_size) {
-    FILE *fp = fopen("../../.ambiente_metadata", "r");
+    FILE *fp = fopen("../.meta/.ambiente_metadata", "r");
     if (fp == NULL) {
         strncpy(buffer, "XXXX", buffer_size - 1);
         buffer[buffer_size - 1] = '\0';

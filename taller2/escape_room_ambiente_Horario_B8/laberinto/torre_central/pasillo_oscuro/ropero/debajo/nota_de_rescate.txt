@@ -1,0 +1,2 @@
+¡Me encontraste! Has demostrado que sabes navegar.
+Bandera 1: FLAG{12CA_NAV_3XP3RT_57EB}
