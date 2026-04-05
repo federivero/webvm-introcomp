@@ -41,8 +41,8 @@ mkdir -p .meta
 if [ -f ".meta/.ambiente_metadata" ]; then
     source .meta/.ambiente_metadata
 else
-    PREFIX=$(printf "%02X" $RANDOM)
-    SUFFIX=$(printf "%02X" $RANDOM)
+    PREFIX=$(printf "%02X" $((RANDOM % 256)))
+    SUFFIX=$(printf "%02X" $((RANDOM % 256)))
     echo "PREFIX=$PREFIX" > .meta/.ambiente_metadata
     echo "SUFFIX=$SUFFIX" >> .meta/.ambiente_metadata
 fi
