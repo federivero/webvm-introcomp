@@ -1,0 +1,2 @@
+¡Me encontraste! Has demostrado que sabes navegar.
+Bandera 1: FLAG{CE_NAV_3XP3RT_8B}
