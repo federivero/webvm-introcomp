@@ -1,7 +1,0 @@
-¡Felicitaciones! Encontraste la nota.
-
-En realidad, son terribles noticias, si estás leyendo esto es que algo terrible ha sucedido.
-
-Al escribir esta nota recordé que la contraseña cambia una vez por mes (como indican todos los protocolos de seguridad), por lo que no tendría sentido escribirla aquí. Lamentablemente no tengo solución. Podrías intentar buscar la contraseña en los logs. Me parece que una vez la ví por ahí...
-
-Bandera 1: FLAG{03_NAV_3XP3RT_24}

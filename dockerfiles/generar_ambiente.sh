@@ -312,7 +312,7 @@ echo "Otro paso, otro recibo." >> boveda/.nota_deudas
 echo "Y lo peor es que están sin pagar..." >> boveda/.nota_deudas
 echo "Ya sé que se pagan con débito automático..." >> boveda/.nota_deudas
 echo "Pero de mientras me aliviaría mucho que esos recibos dijeran 'Un recibo viejo de 0 pesos.', para no amargarme cuando los encuentro." >> boveda/.nota_deudas
-echo "Seguramente podría verificar_deudas luego y dormir en paz." >> boveda/.nota_deudas
+echo "Seguramente podría verificar_recibos luego y dormir en paz." >> boveda/.nota_deudas
 fi
 
 
