@@ -100,7 +100,12 @@ N3="${muebles[$RANDOM % ${#muebles[@]}]}"
 N4="${escondites[$RANDOM % ${#escondites[@]}]}"
 CAMINO_REAL="laberinto/$N1/$N2/$N3/$N4"
 mkdir -p "$CAMINO_REAL"
-echo "¡Me encontraste! Has demostrado que sabes navegar." > "$CAMINO_REAL/nota_de_rescate.txt"
+echo "¡Felicitaciones! Encontraste la nota." > "$CAMINO_REAL/nota_de_rescate.txt"
+echo "" >> "$CAMINO_REAL/nota_de_rescate.txt"
+echo "En realidad, son terribles noticias, si estás leyendo esto es que algo terrible ha sucedido." >> "$CAMINO_REAL/nota_de_rescate.txt"
+echo "" >> "$CAMINO_REAL/nota_de_rescate.txt"
+echo "Al escribir esta nota recordé que la contraseña cambia una vez por mes (como indican todos los protocolos de seguridad), por lo que no tendría sentido escribirla aquí. Lamentablemente no tengo solución. Podrías intentar buscar la contraseña en los logs. Me parece que una vez la ví por ahí..." >> "$CAMINO_REAL/nota_de_rescate.txt"
+echo "" >> "$CAMINO_REAL/nota_de_rescate.txt"
 echo "Bandera 1: FLAG{${PREFIX}_NAV_3XP3RT_${SUFFIX}}" >> "$CAMINO_REAL/nota_de_rescate.txt"
 fi
 
