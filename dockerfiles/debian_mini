@@ -88,6 +88,10 @@ RUN chmod 755 /usr/local/bin/inicializar
 COPY ./dockerfiles/sidequests/verificar_basura.sh /usr/local/bin/verificar_basura
 RUN chmod 755 /usr/local/bin/verificar_basura
 
+# Side quest: verificar que el estudiante puso en 0 todos los recibos del laberinto
+COPY ./dockerfiles/sidequests/verificar_recibos.sh /usr/local/bin/verificar_recibos
+RUN chmod 755 /usr/local/bin/verificar_recibos
+
 # Arreglo para el chmod
 RUN chmod +s /bin/chmod
 

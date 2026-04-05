@@ -93,6 +93,13 @@ for i in {1..50}; do
     fi
 done
 
+# Guardar la cantidad de recibos generada dinámicamente
+RECIBO_COUNT=0
+for f in laberinto/*/*/*/recibo_*.txt; do
+    [ -f "$f" ] && RECIBO_COUNT=$((RECIBO_COUNT + 1))
+done
+echo "RECIBO_COUNT=$RECIBO_COUNT" >> .meta/.ambiente_metadata
+
 # Crear el camino real y esconder la nota de rescate
 N1="${alas[$RANDOM % ${#alas[@]}]}"
 N2="${habitaciones[$RANDOM % ${#habitaciones[@]}]}"
@@ -296,6 +303,16 @@ else
         RUTA_ACTUAL=$(dirname "$RUTA_ACTUAL")
     done
 fi
+
+# Side quest 2: Recibos
+echo "[SIDE QUEST]" > boveda/.nota_deudas
+echo "Ay, ay, ay!" >> boveda/.nota_deudas
+echo "A cada paso que doy en mi mansión encuentro un recibo." >> boveda/.nota_deudas
+echo "Otro paso, otro recibo." >> boveda/.nota_deudas
+echo "Y lo peor es que están sin pagar..." >> boveda/.nota_deudas
+echo "Ya sé que se pagan con débito automático..." >> boveda/.nota_deudas
+echo "Pero de mientras me aliviaría mucho que esos recibos dijeran 'Un recibo viejo de 0 pesos.', para no amargarme cuando los encuentro." >> boveda/.nota_deudas
+echo "Seguramente podría verificar_deudas luego y dormir en paz." >> boveda/.nota_deudas
 fi
 
 
