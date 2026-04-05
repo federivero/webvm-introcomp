@@ -1,1 +1,0 @@
-Parece una sala simple. La clave seguramente esté en clave.secret.
