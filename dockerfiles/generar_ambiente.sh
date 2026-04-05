@@ -37,13 +37,32 @@ cd "$BASE_DIR" || return 1
 
 # Mantener consistencia en el prefijo y sufijo si ya se habían generado para este grupo (útil si se regenera solo un desafío)
 local PREFIX SUFFIX
-if [ -f ".ambiente_metadata" ]; then
-    source .ambiente_metadata
+mkdir -p .meta
+if [ -f ".meta/.ambiente_metadata" ]; then
+    source .meta/.ambiente_metadata
 else
-    PREFIX=$(printf "%04X" $RANDOM)
-    SUFFIX=$(printf "%04X" $RANDOM)
-    echo "PREFIX=$PREFIX" > .ambiente_metadata
-    echo "SUFFIX=$SUFFIX" >> .ambiente_metadata
+    PREFIX=$(printf "%02X" $RANDOM)
+    SUFFIX=$(printf "%02X" $RANDOM)
+    echo "PREFIX=$PREFIX" > .meta/.ambiente_metadata
+    echo "SUFFIX=$SUFFIX" >> .meta/.ambiente_metadata
+fi
+chmod a-r,a+x .meta
+
+
+## --- Desafío 0: Demo del Docente --- ##
+if [[ "$DESAFIOS_SELECCIONADOS" == *"all"* ]] || [[ " $DESAFIOS_SELECCIONADOS " =~ " 0 " ]]; then
+
+echo "Configurando Desafío 0 (Demo)..."
+rm -rf demo_inicial
+mkdir -p demo_inicial/otra_carpeta
+
+echo "¡Hola! Este es un archivo de texto." > demo_inicial/bienvenida.txt
+echo "Si estás leyendo esto, significa que usaste el comando 'cat' correctamente." >> demo_inicial/bienvenida.txt
+echo "Ahora intenta entrar en 'otra_carpeta' usando el comando 'cd'." >> demo_inicial/bienvenida.txt
+
+echo "¡Genial! Has navegado hasta aquí." > demo_inicial/otra_carpeta/secreto_demo.txt
+echo "Bandera 0: FLAG{${PREFIX}_D3M0_0_${SUFFIX}}" >> demo_inicial/otra_carpeta/secreto_demo.txt
+
 fi
 
 
@@ -129,7 +148,7 @@ for i in {1..1000}; do
 done
 
 # Guardar la cantidad de fallos generada dinámicamente
-echo "FAILED_COUNT=$FAILED_COUNT" >> .ambiente_metadata
+echo "FAILED_COUNT=$FAILED_COUNT" >> .meta/.ambiente_metadata
 
 # Crear el código fuente en C para el ejecutable validador
 cat << 'EOF' > servidor_web/validar.c
@@ -139,7 +158,7 @@ cat << 'EOF' > servidor_web/validar.c
 
 // Lee una variable del archivo de metadatos para mantener las banderas dinámicas
 void get_meta_var(const char *var_name_eq, char *buffer, size_t buffer_size) {
-    FILE *fp = fopen("../.ambiente_metadata", "r");
+    FILE *fp = fopen("../.meta/.ambiente_metadata", "r");
     if (fp == NULL) {
         strncpy(buffer, "XXXX", buffer_size - 1);
         buffer[buffer_size - 1] = '\0';
@@ -283,7 +302,7 @@ cat << 'EOF' > panel_control/reinicio_sistema.c
 // Lee una variable del archivo de metadatos para mantener las banderas dinámicas
 void get_meta_var(const char *var_name_eq, char *buffer, size_t buffer_size) {
     // La ruta es relativa al ejecutable, que estará en panel_control/
-    FILE *fp = fopen("../.ambiente_metadata", "r");
+    FILE *fp = fopen("../.meta/.ambiente_metadata", "r");
     if (fp == NULL) {
         strncpy(buffer, "XXXX", buffer_size - 1);
         buffer[buffer_size - 1] = '\0';
