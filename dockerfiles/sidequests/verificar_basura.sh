@@ -26,6 +26,12 @@ fi
 
 LABERINTO="$ESCAPE_DIR/laberinto"
 
+# Verificar que el laberinto está desbloqueado (accesible)
+if [ ! -x "$LABERINTO" ] || [ ! -r "$LABERINTO" ]; then
+    echo "Este comando es para uso posterior en el taller."
+    exit 1
+fi
+
 # Contar archivos basura.txt con globbing (find no está disponible)
 # Los archivos falsos están a exactamente 3 niveles: laberinto/<ala>/<habitacion>/<mueble>/basura.txt
 COUNT=0
