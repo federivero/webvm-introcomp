@@ -84,6 +84,10 @@ RUN gcc -o /usr/local/bin/_fix_ownership /tmp/_fix_ownership.c \
 COPY ./dockerfiles/inicializar.sh /usr/local/bin/inicializar
 RUN chmod 755 /usr/local/bin/inicializar
 
+# Side quest: verificar que el estudiante eliminó todos los basura.txt del laberinto
+COPY ./dockerfiles/sidequests/verificar_basura.sh /usr/local/bin/verificar_basura
+RUN chmod 755 /usr/local/bin/verificar_basura
+
 # Arreglo para el chmod
 RUN chmod +s /bin/chmod
 

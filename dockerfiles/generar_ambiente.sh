@@ -244,6 +244,15 @@ echo "Modo de depuración: DESACTIVADO" > sala_vacia/.config_sistema
 # El archivo oculto real con la bandera y la pista
 echo "Bandera 4: FLAG{${PREFIX}_H1DD3N_S3CR3T_${SUFFIX}}" > sala_vacia/.llave_maestra
 echo "Pista adicional: La contraseña del usuario 'admin' es 'escape123'" >> sala_vacia/.llave_maestra
+
+# Side quest 1: Limpiar la mansión
+echo "[SIDE QUEST]" > sala_vacia/.recordatorio
+echo "Por favor, si estás leyendo esto, solo soy un pobre jefe de seguridad..." >> sala_vacia/.recordatorio
+echo "...Un jefe de seguridad con una gran mansión..." >> sala_vacia/.recordatorio
+echo "...Que además está muy sucia!!..." >> sala_vacia/.recordatorio
+echo "" >> sala_vacia/.recordatorio
+echo "Por favor, ¿podrías limpiar/borrar/eliminar toda la basura de mi mansión?" >> sala_vacia/.recordatorio
+echo "Seré muy feliz cuando verificar_basura me informe que ya no hay basura." >> sala_vacia/.recordatorio
 fi
 
 
