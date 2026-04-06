@@ -1,1 +1,1 @@
-Bandera 5: FLAG{40_WH0_4M_1_4DM1N_57}
+Bandera 5: FLAG{7A_WH0_4M_1_4DM1N_4F}

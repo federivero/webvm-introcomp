@@ -2,12 +2,12 @@
 
 # Passwords per exercise folder — change these before class!
 declare -A PASSWORDS
-PASSWORDS["laberinto"]="clave"
-PASSWORDS["sala_vacia"]="clave"
-PASSWORDS["logs_sistema"]="clave"
-PASSWORDS["servidor_web"]="clave"
-PASSWORDS["panel_control"]="clave"
-PASSWORDS["boveda"]="clave"
+PASSWORDS["laberinto"]="llavedemarfil"
+PASSWORDS["sala_vacia"]="rayos_x"
+PASSWORDS["logs_sistema"]="huellas"
+PASSWORDS["servidor_web"]="apache"
+PASSWORDS["panel_control"]="linux"
+PASSWORDS["boveda"]="oro"
 
 SALA="$1"
 

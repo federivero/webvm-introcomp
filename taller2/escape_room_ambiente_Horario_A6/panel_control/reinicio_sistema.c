@@ -46,7 +46,13 @@ int main() {
     fflush(stdout);
     sleep(2);
     printf("Sistemas restaurados. ¡Felicidades, salvaste los datos!\n");
-    printf("Bandera 6: FLAG{%s_CHM0D_W1N_%s}\n", prefix, suffix);
+    /* Parte central de la bandera codificada con XOR para dificultar lectura directa del binario */
+    const unsigned char enc[] = {0x19, 0x12, 0x17, 0x6A, 0x1E, 0x05, 0x0D, 0x6B, 0x14};
+    char mid[10];
+    int i;
+    for (i = 0; i < 9; i++) mid[i] = enc[i] ^ 0x5A;
+    mid[9] = '\0';
+    printf("Bandera 6: FLAG{%s_%s_%s}\n", prefix, mid, suffix);
 
     return 0;
 }
