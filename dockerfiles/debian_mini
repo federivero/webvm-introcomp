@@ -18,13 +18,12 @@ RUN mv /usr/bin/find /usr/bin/find.bak \
     && printf '#!/bin/bash\necho "Ahhh... comando find. No no no, estás haciendo trampita. Las autoridades de facultad ya fueron avisadas."\n' > /usr/bin/find \
     && chmod +x /usr/bin/find
 
-
 # Alias para que grep siempre trate los archivos como texto
 RUN echo "alias grep='grep --text'" >> /etc/bash.bashrc \
     && echo "alias grep='grep --text'" >> /home/user/.bashrc
 
 # Copiamos el taller al directorio del usuario
-COPY --chown=user:user ./taller2 /home/user/taller2
+COPY ./taller2 /home/user/taller2
 
 # Permisos de solo lectura para el archivo de metadata
 RUN chmod 111 /home/user/taller2/*/.meta \

@@ -22,11 +22,18 @@ if [ -z "${PASSWORDS[$SALA]+x}" ]; then
     exit 1
 fi
 
+# Encontrar el directorio base del ambiente actual
+AMBIENTE_DIR=$(pwd | grep -o '^/home/user/taller2/escape_room_ambiente_[^/]*')
+if [ -z "$AMBIENTE_DIR" ]; then
+    echo "Error: Debes estar dentro de un directorio de ambiente (escape_room_ambiente_...) para usar este comando."
+    exit 1
+fi
+
 read -p "Contraseña: " INPUT
 echo
 
 if [ "$INPUT" = "${PASSWORDS[$SALA]}" ]; then
-    /usr/local/bin/_do_unlock "$SALA"
+    /usr/local/bin/_do_unlock "$SALA" "$AMBIENTE_DIR"
     echo "¡Sala '$SALA' desbloqueada!"
 else
     echo "Contraseña incorrecta."

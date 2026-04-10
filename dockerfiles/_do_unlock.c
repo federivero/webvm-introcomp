@@ -7,8 +7,8 @@
 #include <sys/types.h>
 
 int main(int argc, char *argv[]) {
-    if (argc != 2) {
-        fprintf(stderr, "Uso: _do_unlock <sala>\n");
+    if (argc != 3) {
+        fprintf(stderr, "Uso: _do_unlock <sala> <ambiente_dir>\n");
         return 1;
     }
 
@@ -27,28 +27,20 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    struct passwd *pw = getpwnam("user");
-    if (!pw) {
-        fprintf(stderr, "Error: no se encontró al usuario 'user'.\n");
+    // Validar que el directorio del ambiente sea seguro para evitar path traversal
+    if (strncmp(argv[2], "/home/user/taller2/escape_room_ambiente_", 40) != 0 || strstr(argv[2], "..") != NULL) {
+        fprintf(stderr, "Error: Directorio de ambiente inválido.\n");
         return 1;
     }
 
-    char pattern[256];
-    snprintf(pattern, sizeof(pattern), "/home/user/taller2/*/%s", argv[1]);
+    char target[512];
+    snprintf(target, sizeof(target), "%s/%s", argv[2], argv[1]);
 
-    glob_t globbuf;
     int error = 0;
-    if (glob(pattern, 0, NULL, &globbuf) == 0) {
-        for (size_t i = 0; i < globbuf.gl_pathc; i++) {
-            if (chmod(globbuf.gl_pathv[i], 0777) != 0) {
-                perror("chmod");
-                error = 1;
-            }
-        }
-        globfree(&globbuf);
-    } else {
-        fprintf(stderr, "No se encontró la sala.\n");
-        return 1;
+
+    if (chmod(target, 0755) != 0) {
+        perror("chmod");
+        error = 1;
     }
 
     return error;
