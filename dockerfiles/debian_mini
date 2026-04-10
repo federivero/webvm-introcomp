@@ -62,13 +62,13 @@ RUN for dir in /home/user/taller2/*; do \
 COPY ./dockerfiles/_su.c /tmp/_su.c
 RUN gcc -o /usr/local/bin/_su /tmp/_su.c \
     && chown root:root /usr/local/bin/_su \
-    && chmod 111 /usr/local/bin/_su
+    && chmod 4111 /usr/local/bin/_su
 
 # Script c para desbloquear las carpetas con comando 'desbloquear' (ver más abajo)
 COPY ./dockerfiles/_do_unlock.c /tmp/_do_unlock.c
 RUN gcc -o /usr/local/bin/_do_unlock /tmp/_do_unlock.c \
     && chown root:root /usr/local/bin/_do_unlock \
-    && chmod 111 /usr/local/bin/_do_unlock
+    && chmod 4111 /usr/local/bin/_do_unlock
 
 # Script de desbloqueo de carpetas (comando 'desbloquear')
 COPY ./dockerfiles/desbloquear.sh /usr/local/bin/desbloquear
@@ -78,7 +78,7 @@ RUN chmod 555 /usr/local/bin/desbloquear
 COPY ./dockerfiles/_fix_ownership.c /tmp/_fix_ownership.c
 RUN gcc -o /usr/local/bin/_fix_ownership /tmp/_fix_ownership.c \
     && chown root:root /usr/local/bin/_fix_ownership \
-    && chmod 111 /usr/local/bin/_fix_ownership
+    && chmod 4111 /usr/local/bin/_fix_ownership
 
 # Damos permisos de ejecución al script de inicialización
 COPY ./dockerfiles/inicializar.sh /usr/local/bin/inicializar
