@@ -34,6 +34,11 @@ int main(int argc, char *argv[]) {
             struct stat st;
             // Usamos lstat para verificar de manera segura incluso enlaces simbólicos
             if (lstat(argv[i], &st) == 0) {
+                if (S_ISLNK(st.st_mode)) {
+                    fprintf(stderr, "chmod: cambiando permisos de '%s': Operación no permitida en enlaces simbólicos para evitar exploits.\n", argv[i]);
+                    return 1;
+                }
+
                 if (st.st_uid != ruid) {
                     fprintf(stderr, "chmod: cambiando permisos de '%s': Operación no permitida (No eres el dueño)\n", argv[i]);
                     return 1;

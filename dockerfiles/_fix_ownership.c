@@ -16,6 +16,15 @@ int main(int argc, char *argv[]) {
     char cmd_chown_admin[512];
 
     if (argc == 2) {
+        /* Validar input para evitar inyección de comandos mediante system() */
+        for (int i = 0; argv[1][i] != '\0'; i++) {
+            char c = argv[1][i];
+            if (!((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == '_')) {
+                fprintf(stderr, "Error: Nombre de grupo inválido.\n");
+                return 1;
+            }
+        }
+
         snprintf(target_dir, sizeof(target_dir), "/home/user/taller2/%s", argv[1]);
         snprintf(cmd_chown_user, sizeof(cmd_chown_user), "chown -R user:user %s", target_dir);
         snprintf(cmd_chown_admin, sizeof(cmd_chown_admin), "chown admin:admin %s/boveda/tesoro.txt", target_dir);
