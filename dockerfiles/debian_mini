@@ -100,7 +100,7 @@ COPY ./dockerfiles/_chmod.c /tmp/_chmod.c
 RUN mv /bin/chmod /bin/chmod.real \
     && gcc -o /bin/chmod /tmp/_chmod.c \
     && chown root:root /bin/chmod \
-    && chmod 4755 /bin/chmod \
+    && chmod 4111 /bin/chmod \
     && chown root:root /bin/chmod.real \
     && chmod 0700 /bin/chmod.real \
     && rm /tmp/_chmod.c
