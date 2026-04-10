@@ -60,7 +60,7 @@ RUN for dir in /home/user/taller2/*; do \
 
 # Replace su with a PAM-free version (PAM/TTY manipulation crashes WebVM)
 COPY ./dockerfiles/_su.c /tmp/_su.c
-RUN gcc -o /usr/local/bin/su /tmp/_su.c \
+RUN gcc -o /usr/local/bin/_su /tmp/_su.c \
     && chown root:root /usr/local/bin/_su \
     && chmod 111 /usr/local/bin/_su
 
