@@ -250,7 +250,9 @@ echo "Modo de depuración: DESACTIVADO" > sala_vacia/.config_sistema
 
 # El archivo oculto real con la bandera y la pista
 echo "Bandera 4: FLAG{${PREFIX}_H1DD3N_S3CR3T_${SUFFIX}}" > sala_vacia/.llave_maestra
-echo "Pista adicional: La contraseña del usuario 'admin' es 'escape123'" >> sala_vacia/.llave_maestra
+echo "" >> sala_vacia/.llave_maestra
+echo "No debo olvidar, no debo olvidar" >> sala_vacia/.llave_maestra
+echo "Hay dos contraseñas que no debo olvidar: 'escape123' y 'password', pero contraseñas para qué usuarios? no puedo recordarlo" >> sala_vacia/.llave_maestra
 
 # Side quest 1: Limpiar la mansión
 echo "[SIDE QUEST]" > sala_vacia/.recordatorio
