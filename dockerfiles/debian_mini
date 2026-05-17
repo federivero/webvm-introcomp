@@ -6,7 +6,7 @@ RUN apt-get -y install apt-utils gcc \
 	fakeroot dbus base whiptail hexedit \
 	patch wamerican ucf manpages \
 	file luajit make lua5.4 dialog curl \
-	less cowsay netcat-openbsd sudo
+	less cowsay netcat-openbsd sudo iproute2 openssh-client
 
 # Configuración de usuarios
 RUN echo 'root:password' | chpasswd
