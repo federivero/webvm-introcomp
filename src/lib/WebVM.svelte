@@ -362,7 +362,7 @@
 	<nav aria-label="Primary" class="navbar">
 		<ul class="items">
 			<span class="nav-company-name-wrapper">
-				<span class="nav-company-name">Introducción a la Computación - Taller 2: Consola</span>
+				<span class="nav-company-name">Introducción a la Computación - Taller 4: Redes y Conexión Remota</span>
 			</span>
 		</ul>
 	</nav>
